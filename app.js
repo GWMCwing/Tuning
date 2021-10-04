@@ -1,8 +1,8 @@
 const fs = require('fs');
 // additional req
 const { Client, Collection, Intents } = require('discord.js');
-const { TOKEN } = require('./config.json');
-
+const { TOKEN, PREFIX } = require('./config.json');
+const { PlayerObj } = require('./player.js');
 //
 // Create a new client instance
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
@@ -42,5 +42,47 @@ client.on('interactionCreate', async (interaction) => {
 	}
 });
 
+var commandDict = {
+	help: 'helpFunction',
+	connect: 'player_ConnectFunction',
+	disconnect: 'player_DisconnectFunction',
+	//
+	p: 'player_PlayFunction',
+	play: 'player_PlayFunction',
+	//
+	remove: 'player_RemoveFromListFunction',
+	loop: 'player_LoopFunction',
+	// loop without arg = loop song
+	// loop with -q = loop queue
+	// when loop queue is true loop song is false, either one is true at a time
+	//
+	q: 'player_ListQueueFunction',
+	queue: 'player_ListQueueFunction',
+	//
+	resume: 'player_ResumeFunction',
+	pause: 'player_PauseFunction',
+	//
+	skip: 'player_SkipFunction',
+	seek: 'player_SeekFunction',
+};
+// dict["key1"] = "value1";
+// not exist => undefined
+// check for key	dict.hasOwnProperty('key')
+// delete key	delete dict.key
+//
+
+// prefix command
+client.on('message', async (message) => {
+	if (message.author.bot()) return;
+	if (message.content[0] != PREFIX) return;
+	let firstArg = message.content.split(' ')[0].slice(1);
+	if (commandDict.hasOwnProperty(firstArg.toLowerCase())) {
+		commandDict[firstArg](message);
+	}
+});
+//
+
+//
+//
 // Login to Discord with your client's token
 client.login(TOKEN);
