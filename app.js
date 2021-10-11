@@ -3,6 +3,7 @@ const fs = require('fs');
 const { Client, Collection, Intents } = require('discord.js');
 const { TOKEN, PREFIX } = require('./config.json');
 const { PlayerObj } = require('./player.js');
+
 //
 // Create a new client instance
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
@@ -16,6 +17,36 @@ for (const file of commandFiles) {
 	// Set a new item in the Collection
 	// With the key as the command name and the value as the exported module
 	client.commands.set(command.data.name, command);
+}
+// console log function
+//TODO add type in front e.g. player, guild, bot
+function consoleLogFormator(string, date = false) {
+	let hk_date_string = new Date().toLocaleString('zh-HK', { timeZone: ' Asia/Hong_Kong' });
+	let date_hk = new Date(hk_date_string);
+	// month as (MM) format
+	let month = ('0' + (date_nz.getMonth() + 1)).slice(-2);
+
+	// date as (DD) format
+	let date = ('0' + date_nz.getDate()).slice(-2);
+
+	// hours as (HH) format
+	let hours = ('0' + date_nz.getHours()).slice(-2);
+
+	// minutes as (mm) format
+	let minutes = ('0' + date_nz.getMinutes()).slice(-2);
+
+	// seconds as (ss) format
+	let seconds = ('0' + date_nz.getSeconds()).slice(-2);
+
+	// time as hh:mm:ss format
+	let timeString = hours + ':' + minutes + ':' + seconds;
+
+	if (date) {
+		// date and time as YYYY-MM-DD hh:mm:ss format
+		timeString = date + '-' + month + ' - ' + timeString;
+	}
+
+	console.log('[' + timeString + ']' + string);
 }
 
 // When the client is ready, run this code (only once)
@@ -60,7 +91,9 @@ class server {
 
 //* Server Function
 function server_createDict(client, message) {
-	return new server(message.guildId);
+	consoleLogFormator('creating guild Object id: ' + message.guildId);
+	tempobj = new server(message.guildId);
+	return tempobj;
 }
 function server_getGuild(client, message) {
 	if (serverDict.hasOwnProperty(message.guildId)) {
@@ -82,9 +115,12 @@ function getVCchannelFunction(client, message) {
 function player_ConnectFunction(client, message) {
 	guildDict = server_getGuild(client, message);
 	VCchannel = getVCchannelFunction(client, message);
+	consoleLogFormator('trying to Connect VCchannel ID: ' + VCchannel);
 }
 //
-function player_DisconnectFunction(client, message) {}
+function player_DisconnectFunction(client, message) {
+	consoleLogFormator('trying to Disconnect VCchannel ID: ' + VCchannel);
+}
 //
 function player_PlayFunction(client, message) {}
 //
