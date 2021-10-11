@@ -1,6 +1,6 @@
 class PlayerObj {
-	constructor(playerStream) {
-		this.player = playerStream;
+	constructor() {
+		this.player = undefined;
 		//
 		this.urlList = [];
 		//

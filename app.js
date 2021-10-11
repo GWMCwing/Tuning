@@ -42,28 +42,90 @@ client.on('interactionCreate', async (interaction) => {
 	}
 });
 
+// commnand Below
+//
+function helpFunction(client, message) {
+	return false;
+}
+
+// server Dict
+var serverDict = {};
+
+class server {
+	constructor(serverId) {
+		this.id = serverId;
+		this.player = new PlayerObj();
+	}
+}
+
+//* Server Function
+function server_createDict(client, message) {
+	return new server(message.guildId);
+}
+function server_getGuild(client, message) {
+	if (serverDict.hasOwnProperty(message.guildId)) {
+		return serverDict[message.guildId];
+	} else {
+		return server_createDict(client, message);
+	}
+}
+//
+//
+
+//* Player Function
+function player_createObj(client, message) {}
+//
+function getVCchannelFunction(client, message) {
+	return message.member.voice.channel;
+}
+
+function player_ConnectFunction(client, message) {
+	guildDict = server_getGuild(client, message);
+	VCchannel = getVCchannelFunction(client, message);
+}
+//
+function player_DisconnectFunction(client, message) {}
+//
+function player_PlayFunction(client, message) {}
+//
+function player_RemoveFromListFunction(client, message) {}
+//
+function player_LoopFunction(client, message) {}
+//
+function player_ListQueueFunction(client, message) {}
+//
+function player_ResumeFunction(client, message) {}
+//
+function player_PauseFunction(client, message) {}
+//
+function player_SkipFunction(client, message) {}
+//
+function player_SeekFunction(client, message) {}
+
+//
+// end of command function
 var commandDict = {
-	help: 'helpFunction',
-	connect: 'player_ConnectFunction',
-	disconnect: 'player_DisconnectFunction',
+	help: helpFunction,
+	connect: player_ConnectFunction,
+	disconnect: player_DisconnectFunction,
 	//
-	p: 'player_PlayFunction',
-	play: 'player_PlayFunction',
+	p: player_PlayFunction,
+	play: player_PlayFunction,
 	//
-	remove: 'player_RemoveFromListFunction',
-	loop: 'player_LoopFunction',
+	remove: player_RemoveFromListFunction,
+	loop: player_LoopFunction,
 	// loop without arg = loop song
 	// loop with -q = loop queue
 	// when loop queue is true loop song is false, either one is true at a time
 	//
-	q: 'player_ListQueueFunction',
-	queue: 'player_ListQueueFunction',
+	q: player_ListQueueFunction,
+	queue: player_ListQueueFunction,
 	//
-	resume: 'player_ResumeFunction',
-	pause: 'player_PauseFunction',
+	resume: player_ResumeFunction,
+	pause: player_PauseFunction,
 	//
-	skip: 'player_SkipFunction',
-	seek: 'player_SeekFunction',
+	skip: player_SkipFunction,
+	seek: player_SeekFunction,
 };
 // dict["key1"] = "value1";
 // not exist => undefined
@@ -77,7 +139,7 @@ client.on('message', async (message) => {
 	if (message.content[0] != PREFIX) return;
 	let firstArg = message.content.split(' ')[0].slice(1);
 	if (commandDict.hasOwnProperty(firstArg.toLowerCase())) {
-		commandDict[firstArg](message);
+		commandDict[firstArg](client, message);
 	}
 });
 //
