@@ -20,14 +20,10 @@ for (const file of commandFiles) {
 }
 // console log function
 //TODO add type in front e.g. player, guild, bot
+//TODO color https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
 function consoleLogFormator(string, date = false) {
 	let hk_date_string = new Date().toLocaleString('zh-HK', { timeZone: ' Asia/Hong_Kong' });
 	let date_hk = new Date(hk_date_string);
-	// month as (MM) format
-	let month = ('0' + (date_nz.getMonth() + 1)).slice(-2);
-
-	// date as (DD) format
-	let date = ('0' + date_nz.getDate()).slice(-2);
 
 	// hours as (HH) format
 	let hours = ('0' + date_nz.getHours()).slice(-2);
@@ -42,6 +38,11 @@ function consoleLogFormator(string, date = false) {
 	let timeString = hours + ':' + minutes + ':' + seconds;
 
 	if (date) {
+		// month as (MM) format
+		let month = ('0' + (date_nz.getMonth() + 1)).slice(-2);
+
+		// date as (DD) format
+		let date = ('0' + date_nz.getDate()).slice(-2);
 		// date and time as YYYY-MM-DD hh:mm:ss format
 		timeString = date + '-' + month + ' - ' + timeString;
 	}
@@ -175,7 +176,12 @@ client.on('message', async (message) => {
 	if (message.content[0] != PREFIX) return;
 	let firstArg = message.content.split(' ')[0].slice(1);
 	if (commandDict.hasOwnProperty(firstArg.toLowerCase())) {
-		commandDict[firstArg](client, message);
+		try {
+			commandDict[firstArg](client, message);
+		} catch (error) {
+			//TODO add custom error to the log
+			consoleLogFormator('Error occured', true);
+		}
 	}
 });
 //
