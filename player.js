@@ -78,7 +78,7 @@ class PlayerObj {
 	//TODO Testing
 	getAudioStream() {
 		let url = this.urlList[0];
-		return this._ytdl(url);
+		return this._ytdl(url, { filter: (format) => format.container === 'webm' });
 	}
 	playNextSong() {
 		if (this.urlList.length == 0) {
