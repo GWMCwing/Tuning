@@ -4,6 +4,17 @@ const { Client, Collection, Intents } = require('discord.js');
 const { TOKEN, PREFIX } = require('./config.json');
 const { PlayerObj } = require('./player.js');
 const yt_search = require('yt-search');
+const ytdl = require('ytdl-core');
+const {
+	joinVoiceChannel,
+	getVoiceConnection,
+	createAudioPlayer,
+	createAudioResource,
+	AudioPlayer,
+	AudioPlayerStatus,
+	StreamType,
+} = require('@discordjs/voice');
+const { getVideoID } = require('ytdl-core');
 
 // // Create a new client instance
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
@@ -89,7 +100,17 @@ var serverDict = {};
 class server {
 	constructor(serverId) {
 		this.id = serverId;
-		this.player = new PlayerObj();
+		this.connection = undefined;
+		this.player = new PlayerObj(
+			this,
+			ytdl,
+			joinVoiceChannel,
+			getVoiceConnection,
+			createAudioPlayer,
+			createAudioResource,
+			AudioPlayerStatus,
+			StreamType
+		);
 	}
 }
 
@@ -125,13 +146,22 @@ function getAuthorVCchannelFunction(client, message) {
 function getClientVCchannelFunction(client, message) {
 	return message.guild.me.voice.channel;
 }
-
+//TODO
 function player_ConnectFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
-	let VCchannel = getAuthorVCchannelFunction(client, message);
-	consoleLogFormator('trying to Connect VCchannel ID: ' + VCchannel);
+	let authorVCchannel = getAuthorVCchannelFunction(client, message);
+	let clientVCchannel = getClientVCchannelFunction(client, message);
+	if (clientVCchannel !== null && authorVCchannel !== clientVCchannel) {
+		// client in channel && client not in author channel
+		if (guildObj.player.playList.length > 0) {
+			return message.channel.send(`Please wait untill the queue is ended`);
+		}
+	}
+	consoleLogFormator('trying to Connect VCchannel ID: ' + authorVCchannel.id);
+	//! connect to author channel
+	guildObj.player.connect(authorVCchannel);
 }
-//
+//TODO
 function player_DisconnectFunction(client, message) {
 	let VCchannel = getClientVCchannelFunction(client, message);
 	console.log(VCchannel);
@@ -139,20 +169,26 @@ function player_DisconnectFunction(client, message) {
 		return message.channel.send('I am not in a Voice Channel');
 	}
 	let guildObj = server_getGuild(client, message);
-	consoleLogFormator('trying to Disconnect VCchannel ID: ' + VCchannel);
+	consoleLogFormator('trying to Disconnect VCchannel ID: ' + VCchannel.id);
+	//! disconenct
+	guildObj.player.disconnect();
 }
 //
-function player_PlayFunction(client, message) {
+async function player_PlayFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
-	let url = message.content.split(' ').shift().join(' ');
-	guildObj.player.addSong(yt_search, url);
-	guildObj.player.playIfStopped();
+	// let url = message.content.split(' ').shift().join(' ');
+	let url = message.content.split(' ');
+	url.shift();
+	url = url.join(' ');
+	console.log(url);
+	await guildObj.player.addSong(yt_search, url);
+	guildObj.player.playNextSong();
 }
 //
 function player_RemoveFromListFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
 	let index = message.content.split(' ')[2];
-	if (typeof index == 'number') {
+	if (typeof index == 'number' && index >= guildObj.player.playList.length) {
 		guildObj.player.removeFromList(index, message);
 		return true;
 	}
@@ -194,31 +230,6 @@ function player_SeekFunction(client, message) {
 	return message.channel.send(`${time} is not a correct time in seconds`);
 }
 
-//* search url
-function getYTurlID(url) {
-	let listStr = 'list=';
-	let watchStr = 'watch=';
-	let listIndex = url.search(listStr);
-	let watchIndex = url.search(watchStr);
-	let id = null;
-	let type = null;
-	if (listIndex != -1) {
-		let idIndex_start = listIndex + listStr.length();
-		let idIndex_end = url.slice(idIndex_start).search('&');
-		id = url.slice(idIndex_start, idIndex_end);
-		type = 'listId';
-	} else if (watchIndex != -1) {
-		let idIndex_start = watchIndex + watchStr.length();
-		let idIndex_end = url.slice(idIndex_start).search('&');
-		id = url.slice(idIndex_start, idIndex_end);
-		type = 'videoId';
-	}
-	return [type, id];
-}
-
-//
-
-//
 // end of command function
 var commandDict = {
 	help: helpFunction,
