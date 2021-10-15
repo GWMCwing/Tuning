@@ -194,7 +194,7 @@ async function player_PlayFunction(client, message) {
 		return;
 	}
 	if (!guildObj.player.connection) guildObj.player.connect(getAuthorVCchannelFunction(client, message));
-	let addedSong = await guildObj.player.addSong(yt_search, url);
+	let addedSong = await guildObj.player.addSong(yt_search, url, message);
 	if (!addedSong) return message.channel.send('no song added');
 	guildObj.player.playNextSongifEnd();
 }
@@ -202,7 +202,7 @@ async function player_PlayFunction(client, message) {
 function player_RemoveFromListFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
 	let index = message.content.split(' ')[2];
-	if (typeof index == 'number' && index >= guildObj.player.playList.length) {
+	if (parseInt(index, 10).toString() === index && index >= guildObj.player.playList.length) {
 		guildObj.player.removeFromList(index, message);
 		return true;
 	}
@@ -249,10 +249,15 @@ function player_SkipFunction(client, message) {
 	server_getGuild(client, message).player.skip();
 }
 //
+function player_ClearFunction(client, message) {
+	server_getGuild(client, message).player.clear();
+}
+//
 function player_SeekFunction(client, message) {
 	//
+	return message.channel.send('Seek function is not avaliable due to library issues');
 	let time = message.content.split(' ')[1];
-	if (typeof time == 'number') {
+	if (parseInt(time, 10).toString() === time && time >= 0) {
 		server_getGuild(client, message).player.seek(time);
 		return true;
 	}
@@ -291,6 +296,7 @@ var commandDict = {
 	//
 	skip: player_SkipFunction,
 	seek: player_SeekFunction,
+	clear: player_ClearFunction,
 	//
 	gs: getState,
 };

@@ -52,6 +52,8 @@ class PlayerObj {
 			this.connection.destroy();
 			this.connection = undefined;
 		}
+		this.loopQueueBool = false;
+		this.loopSongBool = false;
 		this.urlList = [];
 	}
 	async connect(channel) {
@@ -76,51 +78,87 @@ class PlayerObj {
 		console.log('idleTimeout');
 		setTimeout(() => {
 			if (this.urlList.length == 0) {
+				this.loopQueueBool = false;
+				this.loopSongBool = false;
 				this.disconnect();
 			} else {
 				this.idleTimer = false;
 			}
 		}, 5 * 1000 * 60);
 	}
-	//TODO Testing
 	async getAudioStream(seekTime = 0) {
 		let url = this.urlList[0];
 		return await this._ytdl(url, {
-			quality: 'highestaudio',
+			// quality: 'highestaudio',
 			filter: 'audioonly',
-			begin: `${seekTime}s`,
+			// begin: `${seekTime}s`,
 			// highWaterMark: 1 << 25,
 		});
 	}
-	async playNextSong() {
+	async playNextSong(seekTime = 0) {
 		if (this.urlList.length == 0) {
 			this.idleTimer = true;
 			this.idleTimeout();
 			return;
 		}
 		this.idleTimer = false;
-		let audioStream = await this.getAudioStream();
+		let audioStream = await this.getAudioStream(seekTime);
 		//? which format
-		this.currentResource = this._createAudioResource(audioStream, { inputType: this._StreamType.Opus });
+		this.currentResource = this._createAudioResource(audioStream, {
+			inputType: this._StreamType.Opus,
+			inlineVolume: true,
+		});
+		this.currentResource.volume.setVolume(0.1);
 		this.player.play(this.currentResource);
 		this.subscription = this.connection.subscribe(this.player);
 	}
 	//
 	getYTurlID(url) {
+		console.log(url);
+
 		let listStr = 'list=';
 		let watchStr = 'watch=';
+		let watchStr2 = 'watch?v=';
 		let listIndex = url.search(listStr);
 		let watchIndex = url.search(watchStr);
+		let watchIndex2 = url.search('watch');
+		let Vindex = url.search('v=');
+		if (watchIndex2 == -1 || Vindex == -1) {
+			watchIndex2 = -1;
+		}
+
+		console.log(`index=  ${listIndex}, ${watchIndex}, ${watchIndex2} `);
 		let id = null;
 		let type = null;
 		if (listIndex != -1) {
 			let idIndex_start = listIndex + listStr.length;
 			let idIndex_end = url.slice(idIndex_start).search('&');
+			if (idIndex_end === -1) {
+				idIndex_end = idIndex_start + url.slice(idIndex_start).length + 1;
+			} else {
+				idIndex_end = idIndex_start + idIndex_end + 1;
+			}
+			console.log(idIndex_start, idIndex_end);
 			id = url.slice(idIndex_start, idIndex_end);
 			type = 'listId';
 		} else if (watchIndex != -1) {
 			let idIndex_start = watchIndex + watchStr.length;
 			let idIndex_end = url.slice(idIndex_start).search('&');
+			if (idIndex_end === -1) {
+				idIndex_end = idIndex_start + url.slice(idIndex_start).length + 1;
+			} else {
+				idIndex_end = idIndex_start + idIndex_end + 1;
+			}
+			id = url.slice(idIndex_start, idIndex_end);
+			type = 'videoId';
+		} else if (watchIndex2 != -1) {
+			let idIndex_start = watchIndex2 + watchStr2.length;
+			let idIndex_end = url.slice(idIndex_start).search('&');
+			if (idIndex_end === -1) {
+				idIndex_end = idIndex_start + url.slice(idIndex_start).length + 1;
+			} else {
+				idIndex_end = idIndex_start + idIndex_end + 1;
+			}
 			id = url.slice(idIndex_start, idIndex_end);
 			type = 'videoId';
 		}
@@ -131,88 +169,108 @@ class PlayerObj {
 		if (this.player) return this.player.checkPlayable();
 	}
 	//TODO testing for empty return
-	async addSong(yt_search, string) {
-		let result = await yt_search(string);
-		let type, id;
-		// console.log();
-		// console.log(result.all);
-		// console.log();
-		if (!result.all.length) {
-			[type, id] = this.getYTurlID(string);
+	async addSong(yt_search, string, message) {
+		let result;
+		let [type, id] = this.getYTurlID(string);
+		// try {
+		// 	result = await yt_search(string);
+		// } catch (error) {
+		// 	return message.channel.send(`error Occured ${erorr}`);
+		// }
+		// let type, id;
+
+		if (type) {
 			let opt = {};
 			opt[type] = id;
-			result = await yt_search(opt);
+			try {
+				result = await yt_search(opt);
+			} catch (error) {
+				return message.channel.send(`${error}`);
+			}
 			if (type == 'videoId') {
-				this.urlList.append(result.url);
+				this.urlList.push(result.url);
 			} else if (type == 'listId') {
 				let count = 0;
-				for (let x in result.videos) {
-					let opt = { videoId: x.videoId };
+				for (let i = 0; i < result.videos.length; i++) {
+					let video = result.videos[i];
+					let opt = {};
+					opt.videoId = video.videoId;
 					let tempResult = await yt_search(opt);
 					if (tempResult != 'video unavailable') {
-						this.urlList.append(tempResult.url);
+						this.urlList.push(tempResult.url);
 					} else {
 						count++;
 					}
 				}
 				if (count == result.videos.length) {
-					return false;
+					return message.channel.send('All songs in playlist are unavaliable');
 				}
 			}
+			return true;
 		} else {
+			result = await yt_search(string);
+			// let donebool = false;
 			if (result.playlists.length) {
 				//
 				let count = 0;
 				let playList = result.playlists[0];
-				for (let x in playList.videos) {
-					console.log(x);
-					let opt = { videoId: x.videoId };
-					console.log(opt);
+				let listId = playlist.listId;
+				let opt = {};
+				opt.listId = listId;
+				playList = await yt_search(opt);
+				for (let i = 0; i < playList.videos.length; i++) {
+					let video = playList.videos[i];
+					let opt = {};
+					opt.videoId = video.videoId;
 					let tempResult = await yt_search(opt);
 					if (tempResult != 'video unavailable') {
-						this.urlList.append(tempResult.url);
+						this.urlList.push(tempResult.url);
 					} else {
 						count++;
 					}
 				}
-				if (count == playList.length) {
-					return false;
+				if (count != playList.length) {
+					// return message.channel.send('All songs in playlist are unavaliable');
+					return true;
 				}
 			}
 			// else if (result.live.length) {
 			// 	//
 			// }
-			else if (result.videos.length) {
+			if (result.videos.length) {
 				//
 				this.urlList.push(result.videos[0].url);
+				return true;
 			} else {
 				return false;
 			}
 		}
+		message.channel.send(`error occured`);
 		// console.log(`ended`);
 		// this.playNextSongifEnd();
 		return true;
 	}
-	playNextSongifEnd(force = false) {
+	playNextSongifEnd(force = false, seekTime = 0) {
 		console.log(`playerState: ${this.player.checkPlayable()}`);
 		if ((this.currentResource && this.currentResource.ended) || force) {
 			console.log(`currentResource: ${this.currentResource.ended}`);
 			this.player.stop();
 			// this.player = undefined;
-			this.subscription.unsubscribe();
-			this.subscription = undefined;
-
-			if (!(this.loopSongBool || this.loopQueueBool)) {
+			// this.subscription.unsubscribe();
+			// this.subscription = undefined;
+			if (!(this.loopSongBool || this.loopQueueBool) && seekTime) {
 				this.urlList.shift();
 			}
 		}
 		if (!this.player.checkPlayable()) {
-			this.playNextSong();
+			this.playNextSong(seekTime);
 		}
 	}
 	//* TODO
-	seek(time) {
-		return false;
+	seek(seekTime) {
+		this.player.stop();
+		this.playNextSong(seekTime);
+		return true;
 	}
 	pause() {
 		//
@@ -222,7 +280,10 @@ class PlayerObj {
 		//
 		this.player.unpause();
 	}
-	//TODO
+	clear() {
+		this.urlList = [];
+		this.playNextSongifEnd(true);
+	}
 	skip() {
 		//* loopQueue
 		if (this.loopQueueBool) {
@@ -233,7 +294,6 @@ class PlayerObj {
 			this.urlList.shift();
 			this.playNextSongifEnd(true);
 		}
-		//* no loop
 	}
 	//
 	removeFromList(index) {

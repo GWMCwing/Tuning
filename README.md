@@ -7,6 +7,7 @@
  <!-- npm install ytdl-core@latest -->
  npm install ytdl-core-discord
  npm install @discordjs/voice libsodium-wrappers @discordjs/opus ffmpeg
-
+ npm install miniget
+ npm install m3u8stream
 
 
