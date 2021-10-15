@@ -4,7 +4,7 @@ const { Client, Collection, Intents } = require('discord.js');
 const { TOKEN, PREFIX } = require('./config.json');
 const { PlayerObj } = require('./player.js');
 const yt_search = require('yt-search');
-const ytdl = require('ytdl-core');
+const ytdl = require('ytdl-core-discord');
 const {
 	joinVoiceChannel,
 	getVoiceConnection,
@@ -17,7 +17,14 @@ const {
 const { getVideoID } = require('ytdl-core');
 
 // // Create a new client instance
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const client = new Client({
+	intents: [
+		Intents.FLAGS.GUILDS,
+		Intents.FLAGS.GUILD_MESSAGES,
+		Intents.FLAGS.GUILD_VOICE_STATES,
+		// Intents.FLAGS.GUILD_PRESENCES,
+	],
+});
 
 // // reading command files
 // client.commands = new Collection();
@@ -164,7 +171,7 @@ function player_ConnectFunction(client, message) {
 //TODO
 function player_DisconnectFunction(client, message) {
 	let VCchannel = getClientVCchannelFunction(client, message);
-	console.log(VCchannel);
+	// console.log(VCchannel);
 	if (VCchannel == null) {
 		return message.channel.send('I am not in a Voice Channel');
 	}
@@ -180,9 +187,16 @@ async function player_PlayFunction(client, message) {
 	let url = message.content.split(' ');
 	url.shift();
 	url = url.join(' ');
-	console.log(url);
-	await guildObj.player.addSong(yt_search, url);
-	guildObj.player.playNextSong();
+	// console.log(url);
+	if (!url) {
+		player_ConnectFunction(client, message);
+		guildObj.player.playNextSongifEnd();
+		return;
+	}
+	if (!guildObj.player.connection) guildObj.player.connect(getAuthorVCchannelFunction(client, message));
+	let addedSong = await guildObj.player.addSong(yt_search, url);
+	if (!addedSong) return message.channel.send('no song added');
+	guildObj.player.playNextSongifEnd();
 }
 //
 function player_RemoveFromListFunction(client, message) {
@@ -199,10 +213,25 @@ function player_LoopFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
 	guildObj.player.loopSong();
 }
+function player_LoopQueueFunction(client, message) {
+	let guildObj = server_getGuild(client, message);
+	guildObj.player.loopQueue();
+}
 //
 function player_ListQueueFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
-	guildObj.player.loopQueue();
+	let stringToSend = '```\n';
+	let urlList = guildObj.player.urlList;
+	if (!urlList.length) {
+		return message.channel.send('0 song in Queue');
+	}
+	for (let i = 0; i < urlList.length; i++) {
+		stringToSend += `${i}. ${urlList[i]}\n`;
+	}
+	stringToSend += `Loop Song: ${guildObj.player.loopSongBool}\n`;
+	stringToSend += `Loop Queue: ${guildObj.player.loopQueueBool}\n`;
+	stringToSend += '```';
+	message.channel.send(stringToSend);
 }
 //
 function player_ResumeFunction(client, message) {
@@ -230,6 +259,11 @@ function player_SeekFunction(client, message) {
 	return message.channel.send(`${time} is not a correct time in seconds`);
 }
 
+function getState(client, message) {
+	let s = server_getGuild(client, message).player.getState();
+	message.channel.send(`state: ${s}`);
+}
+
 // end of command function
 var commandDict = {
 	help: helpFunction,
@@ -244,6 +278,7 @@ var commandDict = {
 	//
 	remove: player_RemoveFromListFunction,
 	loop: player_LoopFunction,
+	loopq: player_LoopQueueFunction,
 	// loop without arg = loop song
 	// loop with -q = loop queue
 	// when loop queue is true loop song is false, either one is true at a time
@@ -256,6 +291,8 @@ var commandDict = {
 	//
 	skip: player_SkipFunction,
 	seek: player_SeekFunction,
+	//
+	gs: getState,
 };
 // dict["key1"] = "value1";
 // not exist => undefined

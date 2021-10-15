@@ -22,7 +22,9 @@ class PlayerObj {
 		this.guildClass = guildClass;
 		this.connection = undefined;
 		this.subscription = undefined;
+
 		//
+		this.player = undefined;
 		this.currentResource = undefined;
 		this.urlList = [];
 		//
@@ -32,10 +34,10 @@ class PlayerObj {
 		//
 		this.init();
 	}
-	init() {
-		this.player = this._createAudioPlayer();
-		this.player.on(this._AudioPlayerStatus.Buffering, () => {
-			this.playNextSong();
+	async init() {
+		this.player = await this._createAudioPlayer();
+		this.player.on(this._AudioPlayerStatus.Idle, () => {
+			this.playNextSongifEnd();
 		});
 	}
 	disconnect() {
@@ -50,13 +52,17 @@ class PlayerObj {
 			this.connection.destroy();
 			this.connection = undefined;
 		}
+		this.urlList = [];
 	}
-	connect(channel) {
-		this.connection = this._joinVoiceChannel({
+	async connect(channel) {
+		this.connection = await this._joinVoiceChannel({
 			channelId: channel.id,
 			guildId: channel.guild.id,
 			adapterCreator: channel.guild.voiceAdapterCreator,
 		});
+		if (!this.player) {
+			await this.init();
+		}
 		this.subscription = this.connection.subscribe(this.player);
 	}
 	getConnection() {
@@ -67,8 +73,9 @@ class PlayerObj {
 		this.connection = this.getConnection();
 	}
 	async idleTimeout() {
+		console.log('idleTimeout');
 		setTimeout(() => {
-			if (this.playlists.length > 0) {
+			if (this.urlList.length == 0) {
 				this.disconnect();
 			} else {
 				this.idleTimer = false;
@@ -76,21 +83,27 @@ class PlayerObj {
 		}, 5 * 1000 * 60);
 	}
 	//TODO Testing
-	getAudioStream() {
+	async getAudioStream(seekTime = 0) {
 		let url = this.urlList[0];
-		return this._ytdl(url, { filter: (format) => format.container === 'webm' });
+		return await this._ytdl(url, {
+			quality: 'highestaudio',
+			filter: 'audioonly',
+			begin: `${seekTime}s`,
+			// highWaterMark: 1 << 25,
+		});
 	}
-	playNextSong() {
+	async playNextSong() {
 		if (this.urlList.length == 0) {
-			if (this.idleTime) return;
 			this.idleTimer = true;
 			this.idleTimeout();
 			return;
 		}
-		let audioStream = this.getAudioStream();
+		this.idleTimer = false;
+		let audioStream = await this.getAudioStream();
 		//? which format
-		this.currentResource = this._createAudioResource(audioStream, { inputType: this._StreamType.WebmOpus });
+		this.currentResource = this._createAudioResource(audioStream, { inputType: this._StreamType.Opus });
 		this.player.play(this.currentResource);
+		this.subscription = this.connection.subscribe(this.player);
 	}
 	//
 	getYTurlID(url) {
@@ -114,7 +127,10 @@ class PlayerObj {
 		console.log([type, id]);
 		return [type, id];
 	}
-
+	getState() {
+		if (this.player) return this.player.checkPlayable();
+	}
+	//TODO testing for empty return
 	async addSong(yt_search, string) {
 		let result = await yt_search(string);
 		let type, id;
@@ -147,9 +163,11 @@ class PlayerObj {
 			if (result.playlists.length) {
 				//
 				let count = 0;
-				for (let x in result.videos) {
-					// console.log(x);
+				let playList = result.playlists[0];
+				for (let x in playList.videos) {
+					console.log(x);
 					let opt = { videoId: x.videoId };
+					console.log(opt);
 					let tempResult = await yt_search(opt);
 					if (tempResult != 'video unavailable') {
 						this.urlList.append(tempResult.url);
@@ -157,7 +175,7 @@ class PlayerObj {
 						count++;
 					}
 				}
-				if (count == result.playlists.length) {
+				if (count == playList.length) {
 					return false;
 				}
 			}
@@ -171,7 +189,26 @@ class PlayerObj {
 				return false;
 			}
 		}
+		// console.log(`ended`);
+		// this.playNextSongifEnd();
 		return true;
+	}
+	playNextSongifEnd(force = false) {
+		console.log(`playerState: ${this.player.checkPlayable()}`);
+		if ((this.currentResource && this.currentResource.ended) || force) {
+			console.log(`currentResource: ${this.currentResource.ended}`);
+			this.player.stop();
+			// this.player = undefined;
+			this.subscription.unsubscribe();
+			this.subscription = undefined;
+
+			if (!(this.loopSongBool || this.loopQueueBool)) {
+				this.urlList.shift();
+			}
+		}
+		if (!this.player.checkPlayable()) {
+			this.playNextSong();
+		}
 	}
 	//* TODO
 	seek(time) {
@@ -188,6 +225,14 @@ class PlayerObj {
 	//TODO
 	skip() {
 		//* loopQueue
+		if (this.loopQueueBool) {
+			this.urlList.push(this.urlList[0]);
+			this.urlList.shift();
+			this.playNextSongifEnd(true);
+		} else {
+			this.urlList.shift();
+			this.playNextSongifEnd(true);
+		}
 		//* no loop
 	}
 	//
