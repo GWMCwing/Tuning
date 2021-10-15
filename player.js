@@ -92,7 +92,7 @@ class PlayerObj {
 			// quality: 'highestaudio',
 			filter: 'audioonly',
 			// begin: `${seekTime}s`,
-			// highWaterMark: 1 << 25,
+			highWaterMark: 1 << 25,
 		});
 	}
 	async playNextSong(seekTime = 0) {
