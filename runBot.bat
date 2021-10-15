@@ -1,1 +1,2 @@
 nodemon app.js
+pause

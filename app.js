@@ -1,5 +1,5 @@
 const fs = require('fs');
-global.AbortController = require('AbortController');
+global.AbortController = require('abort-controller');
 // additional req
 
 //
