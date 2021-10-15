@@ -1,5 +1,8 @@
 const fs = require('fs');
+global.AbortController = require('AbortController');
 // additional req
+
+//
 const { Client, Collection, Intents } = require('discord.js');
 const { TOKEN, PREFIX } = require('./config.json');
 const { PlayerObj } = require('./player.js');
