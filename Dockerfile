@@ -4,7 +4,7 @@ COPY . /usr/src/auditbot
 
 WORKDIR /usr/src/auditbot
 
-RUN npm install --global --unsafe-perm forever
+RUN npm install --global --unsafe-perm nodemon
 RUN npm install --global --unsafe-perm ffmpeg-static
 RUN npm install discord.js
 RUN npm install @discordjs/builders
@@ -18,4 +18,4 @@ RUN npm install @discordjs/opus
 RUN npm install ffmpeg
 
 
-CMD forever start app.js
+CMD nodemon -x 'node app.js || (sleep 10; touch app.js)'
