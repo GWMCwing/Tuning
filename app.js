@@ -4,7 +4,7 @@ const { Client, Collection, Intents } = require('discord.js');
 const { TOKEN, PREFIX } = require('./config.json');
 const { PlayerObj } = require('./player.js');
 const yt_search = require('yt-search');
-const ytdl = require('ytdl-core-discord');
+const ytdl = require('ytdl-core');
 const {
 	joinVoiceChannel,
 	getVoiceConnection,
@@ -75,26 +75,6 @@ client.once('ready', () => {
 	consoleLogFormator('Ready!', true);
 });
 
-// replying to commands
-// client.on('interactionCreate', async (interaction) => {
-// 	consoleLogFormator('runned');
-// 	if (!interaction.isCommand()) return;
-
-// 	const command = client.commands.get(interaction.commandName);
-
-// 	if (!command) return;
-
-// 	try {
-// 		await command.execute(interaction);
-// 	} catch (error) {
-// 		console.error(error);
-// 		await interaction.reply({
-// 			content: 'There was an error while executing this command!',
-// 			ephemeral: true,
-// 		});
-// 	}
-// });
-
 // command Below
 //
 function helpFunction(client, message) {
@@ -107,6 +87,7 @@ var serverDict = {};
 class server {
 	constructor(serverId) {
 		this.id = serverId;
+		this.prefix = PREFIX;
 		this.connection = undefined;
 		this.player = new PlayerObj(
 			this,
@@ -136,6 +117,16 @@ function server_getGuild(client, message) {
 		return serverDict[guildId];
 	}
 }
+function resetPrefixFunction(client, message) {
+	let guildObj = server_getGuild(client, message);
+	guildObj.prefix = PREFIX;
+	message.channel.send(`New Prefix: ${guildObj.prefix}`);
+}
+function changePrefixFunction(client, message) {
+	let guildObj = server_getGuild(client, message);
+	guildObj.prefix = message.content.split(' ')[1];
+	message.channel.send(`New Prefix: ${guildObj.prefix}`);
+}
 
 //* message related
 async function removeMessageAfterSeconds(client, message, time) {
@@ -145,43 +136,69 @@ async function removeMessageAfterSeconds(client, message, time) {
 //
 
 //* Player Function
-function player_createObj(client, message) {}
-//
 function getAuthorVCchannelFunction(client, message) {
 	return message.member.voice.channel;
 }
 function getClientVCchannelFunction(client, message) {
 	return message.guild.me.voice.channel;
 }
+/**
+ *
+ * Code: 0 => allow
+ * 		 10 => Author not in Voice channel
+ * 		 11 => Author not in same voice channel as client && urlList > 0
+ * 		 20 => Client not in Voice channel
+ *
+ * @param {client} client
+ * @param {message} message
+ * @returns
+ */
+function checkAuthorInChannel(client, message) {
+	let authorVC = getAuthorVCchannelFunction(client, message);
+	let clientVC = getClientVCchannelFunction(client, message);
+	if (!authorVC) return [10, authorVC, clientVC];
+	else if (!clientVC) return [20, authorVC, clientVC];
+	else if (authorVC != clientVC && server_getGuild(client, message).player.urlList.length != 0)
+		return [11, authorVC, clientVC];
+	return [0, authorVC, clientVC];
+}
 //TODO
 function player_ConnectFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
-	let authorVCchannel = getAuthorVCchannelFunction(client, message);
-	let clientVCchannel = getClientVCchannelFunction(client, message);
-	if (clientVCchannel !== null && authorVCchannel !== clientVCchannel) {
-		// client in channel && client not in author channel
-		if (guildObj.player.playList.length > 0) {
-			return message.channel.send(`Please wait untill the queue is ended`);
-		}
-	}
-	consoleLogFormator('trying to Connect VCchannel ID: ' + authorVCchannel.id);
+	// let authorVCchannel = getAuthorVCchannelFunction(client, message);
+	// let clientVCchannel = getClientVCchannelFunction(client, message);
+	// if (clientVCchannel !== null && authorVCchannel !== clientVCchannel) {
+	// 	// client in channel && client not in author channel
+	// 	if (guildObj.player.urlList.length > 0) {
+	// 		return message.channel.send(`Please wait until the queue is ended`);
+	// 	}
+	// }
+	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
+	if (code == 11) return message.channel.send('Please wait until the queue ended');
+	if (code == 10) return message.channel.send('Please enter a Voice channel');
+	consoleLogFormator(`Trying to Connect VCchannel ID: ${authorVC.id} at ${guildOBj.id}`);
 	//! connect to author channel
-	guildObj.player.connect(authorVCchannel);
+	guildObj.player.connect(message, authorVC);
 }
 //TODO
 function player_DisconnectFunction(client, message) {
-	let VCchannel = getClientVCchannelFunction(client, message);
+	// let VCchannel = getClientVCchannelFunction(client, message);
 	// console.log(VCchannel);
 	if (VCchannel == null) {
 		return message.channel.send('I am not in a Voice Channel');
 	}
+	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
+	if (code == 10) return message.channel.send('You are not in the same Voice Channel');
 	let guildObj = server_getGuild(client, message);
-	consoleLogFormator('trying to Disconnect VCchannel ID: ' + VCchannel.id);
+	consoleLogFormator(`Trying to Connect VCchannel ID: ${clientVC.id} at ${guildOBj.id}`);
 	//! disconenct
 	guildObj.player.disconnect();
 }
 //
 async function player_PlayFunction(client, message) {
+	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
+	if (code == 10) return message.channel.send('Please enter a voice channel');
+	if (code == 11) return message.channel.send('Please wait until the queue ended');
 	let guildObj = server_getGuild(client, message);
 	// let url = message.content.split(' ').shift().join(' ');
 	let url = message.content.split(' ');
@@ -190,19 +207,26 @@ async function player_PlayFunction(client, message) {
 	// console.log(url);
 	if (!url) {
 		player_ConnectFunction(client, message);
-		guildObj.player.playNextSongifEnd();
+		guildObj.player.playNextSongifEnd(message, false, 0);
 		return;
 	}
-	if (!guildObj.player.connection) guildObj.player.connect(getAuthorVCchannelFunction(client, message));
+	//!!!!!!!!!
+	if (!guildObj.player.connection || clientVC.members.size == 1) guildObj.player.connect(message, authorVC);
 	let addedSong = await guildObj.player.addSong(yt_search, url, message);
-	if (!addedSong) return message.channel.send('no song added');
-	guildObj.player.playNextSongifEnd();
+	if (!addedSong) return message.channel.send('no sound track added');
+	message.channel.send('Added: ```' + guildObj.player.urlList.at(-1)[1] + ' ```');
+	guildObj.player.playNextSongifEnd(message, false, 0);
 }
 //
 function player_RemoveFromListFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
-	let index = message.content.split(' ')[2];
-	if (parseInt(index, 10).toString() === index && index >= guildObj.player.playList.length) {
+	if (guildObj.player.urlList.length == 0) return message.channel.send('No sound track is in queue');
+	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
+	if (code == 11) return message.channel.send('You are not in the same Voice Channel');
+	//
+	let indexStr = message.content.split(' ')[1];
+	let index = parseInt(indexStr, 10);
+	if (index.toString() === indexStr && index < guildObj.player.urlList.length) {
 		guildObj.player.removeFromList(index, message);
 		return true;
 	}
@@ -211,11 +235,19 @@ function player_RemoveFromListFunction(client, message) {
 //
 function player_LoopFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
+	if (guildObj.player.urlList.length == 0) return message.channel.send('No sound track is in queue');
+	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
+	if (code == 11) return message.channel.send('You are not in the same Voice Channel');
 	guildObj.player.loopSong();
+	return message.channel.send(`Loop sound track: ${guildObj.player.loopSongBool}`);
 }
 function player_LoopQueueFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
+	if (guildObj.player.urlList.length == 0) return message.channel.send('No sound track is in queue');
+	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
+	if (code == 11) return message.channel.send('You are not in the same Voice Channel');
 	guildObj.player.loopQueue();
+	return message.channel.send(`Loop Queue: ${guildObj.player.loopQueueBool}`);
 }
 //
 function player_ListQueueFunction(client, message) {
@@ -223,42 +255,71 @@ function player_ListQueueFunction(client, message) {
 	let stringToSend = '```\n';
 	let urlList = guildObj.player.urlList;
 	if (!urlList.length) {
-		return message.channel.send('0 song in Queue');
+		return message.channel.send('0 sound track in Queue');
 	}
 	for (let i = 0; i < urlList.length; i++) {
-		stringToSend += `${i}. ${urlList[i]}\n`;
+		stringToSend += `${i}. ${urlList[i][1]}\n`;
+		stringToSend += `      ${urlList[i][0]}\n`;
 	}
-	stringToSend += `Loop Song: ${guildObj.player.loopSongBool}\n`;
+	stringToSend += `Loop sound track: ${guildObj.player.loopSongBool}\n`;
 	stringToSend += `Loop Queue: ${guildObj.player.loopQueueBool}\n`;
 	stringToSend += '```';
 	message.channel.send(stringToSend);
 }
 //
+function player_NowPlayingFunction(client, message) {
+	let guildObj = server_getGuild(client, message);
+	return message.channel.send(`Now Playing: ${guildObj.player.urlList[0][1]}`);
+}
+//
 function player_ResumeFunction(client, message) {
 	//
-	server_getGuild(client, message).player.resume();
+	let guildObj = server_getGuild(client, message);
+	if (guildObj.player.urlList.length == 0) return message.channel.send('No sound track is in queue');
+	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
+	if (code == 11) return message.channel.send('You are not in the same Voice Channel');
+	guildObj.player.resume();
+	return message.channel.send('Resumed playing');
 }
 //
 function player_PauseFunction(client, message) {
 	//
-	server_getGuild(client, message).player.pause();
+	let guildObj = server_getGuild(client, message);
+	if (guildObj.player.urlList.length == 0) return message.channel.send('No sound track is in queue');
+	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
+	if (code == 11) return message.channel.send('You are not in the same Voice Channel');
+	guildObj.player.pause();
+	return message.channel.send('Paused playing');
 }
 //
 function player_SkipFunction(client, message) {
 	//
-	server_getGuild(client, message).player.skip();
+	let guildObj = server_getGuild(client, message);
+	if (guildObj.player.urlList.length == 0) return message.channel.send('No sound track is in queue');
+	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
+	if (code == 11) return message.channel.send('You are not in the same Voice Channel');
+	guildObj.player.skip();
 }
 //
 function player_ClearFunction(client, message) {
-	server_getGuild(client, message).player.clear();
+	let guildObj = server_getGuild(client, message);
+	if (guildObj.player.urlList.length == 0) return message.channel.send('No sound track is in queue');
+	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
+	if (code == 11) return message.channel.send('You are not in the same Voice Channel');
+	guildObj.player.clear();
 }
 //
 function player_SeekFunction(client, message) {
 	//
 	return message.channel.send('Seek function is not avaliable due to library issues');
-	let time = message.content.split(' ')[1];
-	if (parseInt(time, 10).toString() === time && time >= 0) {
-		server_getGuild(client, message).player.seek(time);
+	let guildObj = server_getGuild(client, message);
+	if (guildObj.player.urlList.length == 0) return message.channel.send('No sound track is in queue');
+	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
+	if (code == 11) return message.channel.send('You are not in the same Voice Channel');
+	let timeStr = message.content.split(' ')[1];
+	let time = parseInt(timeStr, 10);
+	if (time.toString() === timeStr && time >= 0) {
+		guildObj.player.seek(message, time);
 		return true;
 	}
 	return message.channel.send(`${time} is not a correct time in seconds`);
@@ -272,6 +333,10 @@ function getState(client, message) {
 // end of command function
 var commandDict = {
 	help: helpFunction,
+	//
+	changeprefix: changePrefixFunction,
+	resetprefix: resetPrefixFunction,
+	//
 	join: player_ConnectFunction,
 	connect: player_ConnectFunction,
 
@@ -284,12 +349,10 @@ var commandDict = {
 	remove: player_RemoveFromListFunction,
 	loop: player_LoopFunction,
 	loopq: player_LoopQueueFunction,
-	// loop without arg = loop song
-	// loop with -q = loop queue
-	// when loop queue is true loop song is false, either one is true at a time
 	//
 	q: player_ListQueueFunction,
 	queue: player_ListQueueFunction,
+	np: player_NowPlayingFunction,
 	//
 	resume: player_ResumeFunction,
 	pause: player_PauseFunction,
@@ -310,9 +373,10 @@ var commandDict = {
 client.on('messageCreate', async (message) => {
 	// consoleLogFormator('Recieved: ' + message.content);
 	if (message.author.bot) return;
+	let guildOBj = server_getGuild(client, message);
 	if (message.content[0] != PREFIX) return;
 	let firstArg = message.content.split(' ')[0].slice(1);
-	consoleLogFormator('Recieved: ' + firstArg);
+	// consoleLogFormator(`Recieved: ${firstArg}`);
 	if (commandDict.hasOwnProperty(firstArg.toLowerCase())) {
 		try {
 			commandDict[firstArg](client, message);

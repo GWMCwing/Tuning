@@ -56,7 +56,7 @@ class PlayerObj {
 		this.loopSongBool = false;
 		this.urlList = [];
 	}
-	async connect(channel) {
+	async connect(message, channel) {
 		this.connection = await this._joinVoiceChannel({
 			channelId: channel.id,
 			guildId: channel.guild.id,
@@ -66,6 +66,7 @@ class PlayerObj {
 			await this.init();
 		}
 		this.subscription = this.connection.subscribe(this.player);
+		this.idleTimeout(message, 10 * 1000 * 60, true);
 	}
 	getConnection() {
 		//
@@ -74,47 +75,50 @@ class PlayerObj {
 	updateConnection(connection = null) {
 		this.connection = this.getConnection();
 	}
-	async idleTimeout() {
-		console.log('idleTimeout');
+	async idleTimeout(message, time = 5 * 1000 * 60, repeat = false) {
 		setTimeout(() => {
 			if (this.urlList.length == 0) {
 				this.loopQueueBool = false;
 				this.loopSongBool = false;
 				this.disconnect();
+				try {
+					message.chanel.send('Disconnected due to Inactivity');
+				} catch (error) {}
 			} else {
 				this.idleTimer = false;
+				if (repeat) this.idleTimeout(message, time, repeat);
 			}
-		}, 5 * 1000 * 60);
+		}, time);
 	}
 	async getAudioStream(seekTime = 0) {
-		let url = this.urlList[0];
+		let url = this.urlList[0][0];
 		return await this._ytdl(url, {
 			// quality: 'highestaudio',
 			filter: 'audioonly',
-			// begin: `${seekTime}s`,
+			begin: `${seekTime}s`,
 			highWaterMark: 1 << 25,
 		});
 	}
-	async playNextSong(seekTime = 0) {
+	async playNextSong(message = null, seekTime = 0) {
 		if (this.urlList.length == 0) {
 			this.idleTimer = true;
-			this.idleTimeout();
 			return;
 		}
 		this.idleTimer = false;
 		let audioStream = await this.getAudioStream(seekTime);
 		//? which format
 		this.currentResource = this._createAudioResource(audioStream, {
-			inputType: this._StreamType.Opus,
+			// inputType: this._StreamType.Opus,
 			inlineVolume: true,
 		});
 		this.currentResource.volume.setVolume(0.1);
 		this.player.play(this.currentResource);
 		this.subscription = this.connection.subscribe(this.player);
+		if (!seekTime && message) message.channel.send('now playing: ``` ' + this.urlList[0][1] + ' ```');
 	}
 	//
 	getYTurlID(url) {
-		console.log(url);
+		// console.log(url);
 
 		let listStr = 'list=';
 		let watchStr = 'watch=';
@@ -127,7 +131,7 @@ class PlayerObj {
 			watchIndex2 = -1;
 		}
 
-		console.log(`index=  ${listIndex}, ${watchIndex}, ${watchIndex2} `);
+		// console.log(`index=  ${listIndex}, ${watchIndex}, ${watchIndex2} `);
 		let id = null;
 		let type = null;
 		if (listIndex != -1) {
@@ -138,7 +142,7 @@ class PlayerObj {
 			} else {
 				idIndex_end = idIndex_start + idIndex_end + 1;
 			}
-			console.log(idIndex_start, idIndex_end);
+			// console.log(idIndex_start, idIndex_end);
 			id = url.slice(idIndex_start, idIndex_end);
 			type = 'listId';
 		} else if (watchIndex != -1) {
@@ -162,7 +166,7 @@ class PlayerObj {
 			id = url.slice(idIndex_start, idIndex_end);
 			type = 'videoId';
 		}
-		console.log([type, id]);
+		// console.log([type, id]);
 		return [type, id];
 	}
 	getState() {
@@ -188,7 +192,7 @@ class PlayerObj {
 				return message.channel.send(`${error}`);
 			}
 			if (type == 'videoId') {
-				this.urlList.push(result.url);
+				this.urlList.push([result.url, result.title]);
 			} else if (type == 'listId') {
 				let count = 0;
 				for (let i = 0; i < result.videos.length; i++) {
@@ -197,7 +201,7 @@ class PlayerObj {
 					opt.videoId = video.videoId;
 					let tempResult = await yt_search(opt);
 					if (tempResult != 'video unavailable') {
-						this.urlList.push(tempResult.url);
+						this.urlList.push([tempResult.url, tempResult.title]);
 					} else {
 						count++;
 					}
@@ -210,36 +214,36 @@ class PlayerObj {
 		} else {
 			result = await yt_search(string);
 			// let donebool = false;
-			if (result.playlists.length) {
-				//
-				let count = 0;
-				let playList = result.playlists[0];
-				let listId = playlist.listId;
-				let opt = {};
-				opt.listId = listId;
-				playList = await yt_search(opt);
-				for (let i = 0; i < playList.videos.length; i++) {
-					let video = playList.videos[i];
-					let opt = {};
-					opt.videoId = video.videoId;
-					let tempResult = await yt_search(opt);
-					if (tempResult != 'video unavailable') {
-						this.urlList.push(tempResult.url);
-					} else {
-						count++;
-					}
-				}
-				if (count != playList.length) {
-					// return message.channel.send('All songs in playlist are unavaliable');
-					return true;
-				}
-			}
+			// if (result.playlists.length) {
+			// 	//
+			// 	let count = 0;
+			// 	let playList = result.playlists[0];
+			// 	let listId = playlist.listId;
+			// 	let opt = {};
+			// 	opt.listId = listId;
+			// 	playList = await yt_search(opt);
+			// 	for (let i = 0; i < playList.videos.length; i++) {
+			// 		let video = playList.videos[i];
+			// 		let opt = {};
+			// 		opt.videoId = video.videoId;
+			// 		let tempResult = await yt_search(opt);
+			// 		if (tempResult != 'video unavailable') {
+			// 			this.urlList.push([tempResult.url, tempResult.title]);
+			// 		} else {
+			// 			count++;
+			// 		}
+			// 	}
+			// 	if (count != playList.length) {
+			// 		// return message.channel.send('All songs in playlist are unavaliable');
+			// 		return true;
+			// 	}
+			// }
 			// else if (result.live.length) {
 			// 	//
 			// }
 			if (result.videos.length) {
 				//
-				this.urlList.push(result.videos[0].url);
+				this.urlList.push([result.videos[0].url, result.videos[0].title]);
 				return true;
 			} else {
 				return false;
@@ -250,10 +254,10 @@ class PlayerObj {
 		// this.playNextSongifEnd();
 		return true;
 	}
-	playNextSongifEnd(force = false, seekTime = 0) {
-		console.log(`playerState: ${this.player.checkPlayable()}`);
+	playNextSongifEnd(message = null, force = false, seekTime = 0) {
+		// console.log(`playerState: ${this.player.checkPlayable()}`);
 		if ((this.currentResource && this.currentResource.ended) || force) {
-			console.log(`currentResource: ${this.currentResource.ended}`);
+			// console.log(`currentResource: ${this.currentResource.ended}`);
 			this.player.stop();
 			// this.player = undefined;
 			// this.subscription.unsubscribe();
@@ -263,13 +267,13 @@ class PlayerObj {
 			}
 		}
 		if (!this.player.checkPlayable()) {
-			this.playNextSong(seekTime);
+			this.playNextSong(message, seekTime);
 		}
 	}
 	//* TODO
-	seek(seekTime) {
+	seek(message, seekTime) {
 		this.player.stop();
-		this.playNextSong(seekTime);
+		this.playNextSong(message, seekTime);
 		return true;
 	}
 	pause() {
@@ -282,17 +286,17 @@ class PlayerObj {
 	}
 	clear() {
 		this.urlList = [];
-		this.playNextSongifEnd(true);
+		this.playNextSongifEnd(null, true);
 	}
 	skip() {
 		//* loopQueue
 		if (this.loopQueueBool) {
 			this.urlList.push(this.urlList[0]);
 			this.urlList.shift();
-			this.playNextSongifEnd(true);
+			this.playNextSongifEnd(null, true);
 		} else {
 			this.urlList.shift();
-			this.playNextSongifEnd(true);
+			this.playNextSongifEnd(null, true);
 		}
 	}
 	//
