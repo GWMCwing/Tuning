@@ -82,7 +82,7 @@ class PlayerObj {
 				this.loopSongBool = false;
 				this.disconnect();
 				try {
-					message.chanel.send('Disconnected due to Inactivity');
+					message.channel.send('Disconnected due to Inactivity');
 				} catch (error) {}
 			} else {
 				this.idleTimer = false;
@@ -262,10 +262,11 @@ class PlayerObj {
 			// this.player = undefined;
 			// this.subscription.unsubscribe();
 			// this.subscription = undefined;
-			if (!(this.loopSongBool || this.loopQueueBool) && seekTime) {
+			if (!(this.loopSongBool || this.loopQueueBool) && !seekTime) {
 				this.urlList.shift();
 			}
 		}
+		if (this.urlList.length == 0) return (this.currentResource = undefined);
 		if (!this.player.checkPlayable()) {
 			this.playNextSong(message, seekTime);
 		}

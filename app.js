@@ -14,7 +14,6 @@ const {
 	AudioPlayerStatus,
 	StreamType,
 } = require('@discordjs/voice');
-const { getVideoID } = require('ytdl-core');
 
 // // Create a new client instance
 const client = new Client({
@@ -26,18 +25,6 @@ const client = new Client({
 	],
 });
 
-// // reading command files
-// client.commands = new Collection();
-// const commandFiles = fs.readdirSync('./commands').filter((file) => file.endsWith('.js'));
-
-// for (const file of commandFiles) {
-// 	const command = require(`./commands/${file}`);
-// 	// Set a new item in the Collection
-// 	// With the key as the command name and the value as the exported module
-// 	client.commands.set(command.data.name, command);
-// }
-
-//
 // console log function
 //TODO add type in front e.g. player, guild, bot
 //TODO color https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
@@ -78,7 +65,11 @@ client.once('ready', () => {
 // command Below
 //
 function helpFunction(client, message) {
-	return false;
+	let helpWebUrl = 'https://github.com/GWMCwing/AuditBot/blob/master/docs/helpList.md';
+	let prefixServer = server_getGuild(client, message).prefix;
+	let msg = 'This Guild Uses ```' + prefixServer + '``` as prefix\n';
+	msg += `Please Visit ${helpWeb} for complete command list`;
+	return message.channel.send(msg);
 }
 
 // server Dict
@@ -129,6 +120,7 @@ function changePrefixFunction(client, message) {
 }
 
 //* message related
+//TODO
 async function removeMessageAfterSeconds(client, message, time) {
 	return true;
 }
@@ -162,17 +154,8 @@ function checkAuthorInChannel(client, message) {
 		return [11, authorVC, clientVC];
 	return [0, authorVC, clientVC];
 }
-//TODO
 function player_ConnectFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
-	// let authorVCchannel = getAuthorVCchannelFunction(client, message);
-	// let clientVCchannel = getClientVCchannelFunction(client, message);
-	// if (clientVCchannel !== null && authorVCchannel !== clientVCchannel) {
-	// 	// client in channel && client not in author channel
-	// 	if (guildObj.player.urlList.length > 0) {
-	// 		return message.channel.send(`Please wait until the queue is ended`);
-	// 	}
-	// }
 	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
 	if (code == 11) return message.channel.send('Please wait until the queue ended');
 	if (code == 10) return message.channel.send('Please enter a Voice channel');
@@ -180,10 +163,8 @@ function player_ConnectFunction(client, message) {
 	//! connect to author channel
 	guildObj.player.connect(message, authorVC);
 }
-//TODO
+
 function player_DisconnectFunction(client, message) {
-	// let VCchannel = getClientVCchannelFunction(client, message);
-	// console.log(VCchannel);
 	if (VCchannel == null) {
 		return message.channel.send('I am not in a Voice Channel');
 	}
@@ -210,7 +191,6 @@ async function player_PlayFunction(client, message) {
 		guildObj.player.playNextSongifEnd(message, false, 0);
 		return;
 	}
-	//!!!!!!!!!
 	if (!guildObj.player.connection || clientVC.members.size == 1) guildObj.player.connect(message, authorVC);
 	let addedSong = await guildObj.player.addSong(yt_search, url, message);
 	if (!addedSong) return message.channel.send('no sound track added');
@@ -331,7 +311,7 @@ function getState(client, message) {
 }
 
 // end of command function
-var commandDict = {
+const commandDict = {
 	help: helpFunction,
 	//
 	changeprefix: changePrefixFunction,
@@ -347,6 +327,7 @@ var commandDict = {
 	play: player_PlayFunction,
 	//
 	remove: player_RemoveFromListFunction,
+	rm: player_RemoveFromListFunction,
 	loop: player_LoopFunction,
 	loopq: player_LoopQueueFunction,
 	//
@@ -363,19 +344,19 @@ var commandDict = {
 	//
 	gs: getState,
 };
-// dict["key1"] = "value1";
-// not exist => undefined
-// check for key	dict.hasOwnProperty('key')
-// delete key	delete dict.key
-//
 
 // prefix command
 client.on('messageCreate', async (message) => {
 	// consoleLogFormator('Recieved: ' + message.content);
 	if (message.author.bot) return;
 	let guildObj = server_getGuild(client, message);
-	if (message.content[0] != PREFIX) return;
+	//!!!!!!
+	if (message.content[0] != guildObj.prefix || message.content[0] != PREFIX) return;
+	//
 	let firstArg = message.content.split(' ')[0].slice(1);
+	if (firstArg == 'resetprefix') {
+		return resetPrefixFunction(client, message);
+	}
 	// consoleLogFormator(`Recieved: ${firstArg}`);
 	if (commandDict.hasOwnProperty(firstArg.toLowerCase())) {
 		try {
@@ -392,7 +373,5 @@ client.on('messageCreate', async (message) => {
 });
 //
 
-//
-//
 // Login to Discord with your client's token
 client.login(TOKEN);
