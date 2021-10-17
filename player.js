@@ -262,8 +262,9 @@ class PlayerObj {
 			// this.player = undefined;
 			// this.subscription.unsubscribe();
 			// this.subscription = undefined;
-			if (!(this.loopSongBool || this.loopQueueBool) && !seekTime) {
-				this.urlList.shift();
+			if (!seekTime) {
+				if (this.loopQueueBool) this.urlList.push(this.urlList[0]);
+				if (!this.loopSongBool) this.urlList.shift();
 			}
 		}
 		if (this.urlList.length == 0) return (this.currentResource = undefined);
