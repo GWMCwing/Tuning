@@ -2,6 +2,8 @@
 ### AuditBot is a small project created by a student to provide a prebuilt discord bot application written in nodejs.
 
 ### Contributions are welcome and appreciated
+# Testing and Invite Link
+### My AuditBot invite [link](https://discord.com/oauth2/authorize?client_id=670964358393888768&permissions=137442454592&scope=bot)
 
 # Requirement for running the bot
 (Either of the following)

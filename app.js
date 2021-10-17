@@ -67,9 +67,15 @@ client.once('ready', () => {
 function helpFunction(client, message) {
 	let helpWebUrl = 'https://github.com/GWMCwing/AuditBot/blob/master/docs/helpList.md';
 	let prefixServer = server_getGuild(client, message).prefix;
-	let msg = 'This Guild Uses ```' + prefixServer + '``` as prefix\n';
-	msg += `Please Visit ${helpWeb} for complete command list`;
+	let msg = 'This guild uses ```' + prefixServer + '``` as prefix\n';
+	msg += `Please visit the below website for complete command list: ${helpWeb}`;
 	return message.channel.send(msg);
+}
+
+function inviteFunction(client, message) {
+	return message.channel.send(
+		'Please use this Link to invite the bot:\n https://discord.com/oauth2/authorize?client_id=670964358393888768&permissions=137442454592&scope=bot'
+	);
 }
 
 // server Dict
@@ -108,12 +114,12 @@ function server_getGuild(client, message) {
 		return serverDict[guildId];
 	}
 }
-function resetPrefixFunction(client, message) {
+function server_ResetPrefixFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
 	guildObj.prefix = PREFIX;
 	message.channel.send(`New Prefix: ${guildObj.prefix}`);
 }
-function changePrefixFunction(client, message) {
+function server_ChangePrefixFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
 	guildObj.prefix = message.content.split(' ')[1];
 	message.channel.send(`New Prefix: ${guildObj.prefix}`);
@@ -313,9 +319,10 @@ function getState(client, message) {
 // end of command function
 const commandDict = {
 	help: helpFunction,
+	invite: inviteFunction,
 	//
-	changeprefix: changePrefixFunction,
-	resetprefix: resetPrefixFunction,
+	changeprefix: server_ChangePrefixFunction,
+	resetprefix: server_ResetPrefixFunction,
 	//
 	join: player_ConnectFunction,
 	connect: player_ConnectFunction,
@@ -355,7 +362,7 @@ client.on('messageCreate', async (message) => {
 	//
 	let firstArg = message.content.split(' ')[0].slice(1);
 	if (firstArg == 'resetprefix') {
-		return resetPrefixFunction(client, message);
+		return server_ResetPrefixFunction(client, message);
 	}
 	// consoleLogFormator(`Recieved: ${firstArg}`);
 	if (commandDict.hasOwnProperty(firstArg.toLowerCase())) {

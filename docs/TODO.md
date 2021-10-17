@@ -13,3 +13,5 @@
 6. Transfer all command to slash command
 
 7. Create readable streaming from youtube (without using ytdl-core)
+
+8. Wrap the process in a subprocess to prevent all variable lost due to crashes (Assuming there is no ram leakage and the computer is not crying)

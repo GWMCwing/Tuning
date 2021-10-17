@@ -5,13 +5,16 @@
 * Related Function ```helpFunction```
 ## changeprefix
 * Change the prefix of the server (Does not save after restart or crashes) (To change the default prefix, edit the PREFIX in config.json instead)
-* Related Function ```changePrefixFunction```
+* Related Function ```server_ChangePrefixFunction```
 ## clear
 * clear the queue
 * Related Function ```player_ClearFunction```
 ## join , connect
 * join the current server
 * Related Function ```player_ConnectFunction```
+## invite
+* provide invite link 
+* Related Function ```inviteFunction```
 ## leave , disconnect
 * leave the current server and clear the queue
 * Related Function ```player_DisconnectFunction```
@@ -32,7 +35,7 @@
 * Related Function ```player_ListQueueFunction```
 ## resetprefix (Uses Default Prefix)
 * Reset Prefix to default
-* Related Function ```resetPrefixFunction```
+* Related Function ```server_ResetPrefixFunction```
 ## remove , rm [index]
 * remove a sound track from queue based on index of track in the queue
 * Related Function ```player_RemoveFromListFunction```
