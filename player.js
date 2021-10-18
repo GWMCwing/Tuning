@@ -81,9 +81,11 @@ class PlayerObj {
 			if (this.urlList.length == 0) {
 				this.loopQueueBool = false;
 				this.loopSongBool = false;
-				this.disconnect();
 				try {
-					message.channel.send('Disconnected due to Inactivity');
+					if (message.guild.me.voice.channel) {
+						message.channel.send('Disconnected due to Inactivity');
+						this.disconnect();
+					}
 				} catch (error) {}
 			} else {
 				this.idleTimer = false;
@@ -112,8 +114,23 @@ class PlayerObj {
 			// inputType: this._StreamType.Opus,
 			inlineVolume: true,
 		});
-		this.currentResource.volume.setVolume(0.1);
+		this.currentResource.volume.setVolume(0.3);
 		this.player.play(this.currentResource);
+		//https://github.com/fent/node-ytdl-core/issues/932
+		const funcao = audioStream.listeners('error')[2];
+		audioStream.removeListener('error', funcao);
+		audioStream.on('error', (err) => {
+			try {
+				throw new Error();
+			} catch {
+				audioStream.destroy();
+				console.log(err);
+				if (message) message.channel.send('Restart Due to Crashes');
+				setTimeout(this.playNextSongifEnd(message, true, 1), 500); // restart after 50 seconds
+			}
+		});
+
+		//
 		this.subscription = this.connection.subscribe(this.player);
 		if (!seekTime && message) message.channel.send('now playing: ``` ' + this.urlList[0][1] + ' ```');
 	}

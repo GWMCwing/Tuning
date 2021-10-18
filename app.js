@@ -146,7 +146,6 @@ function getClientVCchannelFunction(client, message) {
  * 		 10 => Author not in Voice channel
  * 		 11 => Author not in same voice channel as client && urlList > 0
  * 		 20 => Client not in Voice channel
- *
  * @param {client} client
  * @param {message} message
  * @returns
@@ -171,10 +170,8 @@ function player_ConnectFunction(client, message) {
 }
 
 function player_DisconnectFunction(client, message) {
-	if (VCchannel == null) {
-		return message.channel.send('I am not in a Voice Channel');
-	}
 	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
+	if (code == 20) return message.channel.send('I am not in a Voice Channel');
 	if (code == 10) return message.channel.send('You are not in the same Voice Channel');
 	let guildObj = server_getGuild(client, message);
 	consoleLogFormator(`Trying to Connect VCchannel ID: ${clientVC.id} at ${guildObj.id}`);
@@ -357,14 +354,19 @@ client.on('messageCreate', async (message) => {
 	// consoleLogFormator('Recieved: ' + message.content);
 	if (message.author.bot) return;
 	let guildObj = server_getGuild(client, message);
+	if (message.mentions.members.first().id == message.guild.me.id && message.content.search('help') !== -1) {
+		return helpFunction(client, message);
+	}
 	//!!!!!!
-	if (message.content[0] != guildObj.prefix || message.content[0] != PREFIX) return;
-	//
+	let firstChar = message.content[0];
+	if (firstChar != guildObj.prefix || firstChar != PREFIX) return;
 	let firstArg = message.content.split(' ')[0].slice(1);
+	//
 	if (firstArg == 'resetprefix') {
 		return server_ResetPrefixFunction(client, message);
 	}
 	// consoleLogFormator(`Recieved: ${firstArg}`);
+	if (firstChar != guildObj.prefix) return;
 	if (commandDict.hasOwnProperty(firstArg.toLowerCase())) {
 		try {
 			commandDict[firstArg](client, message);
