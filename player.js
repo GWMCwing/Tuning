@@ -1,3 +1,9 @@
+//TODO
+var temphandler = function(){
+	//!
+} 
+
+
 class PlayerObj {
 	constructor(
 		guildClass,
@@ -102,6 +108,14 @@ class PlayerObj {
 			highWaterMark: 1 << 25,
 		});
 	}
+
+	streamCrashHandler(error){
+		//TODO
+		// create global function for handler to call
+		// top of this file
+		return null;
+	}
+
 	async playNextSong(message = null, seekTime = 0) {
 		if (this.urlList.length == 0) {
 			this.idleTimer = true;
@@ -109,6 +123,8 @@ class PlayerObj {
 		}
 		this.idleTimer = false;
 		let audioStream = await this.getAudioStream(seekTime);
+		//!!!
+		audioStream.on('error',this.streamCrashHandler)
 		//? which format
 		this.currentResource = this._createAudioResource(audioStream, {
 			// inputType: this._StreamType.Opus,
