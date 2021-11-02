@@ -1,28 +1,28 @@
 # Command List
 ### All command has to be started with ```PREFIX``` or Guild Stated PREFIX e.g. ```PREFIX [command] [...args]```
 ## help
-* Provide helpList Website (This repository file by default)
+* Provide a link to the helpList Website (This repository file by default)
 * Related Function ```helpFunction```
 ## changeprefix
-* Change the prefix of the server (Does not save after restart or crashes) (To change the default prefix, edit the PREFIX in config.json instead)
+* Change the prefix of bot commands (Does not save after restart or crashes) (To change the default prefix, edit the PREFIX in config.json instead)
 * Related Function ```server_ChangePrefixFunction```
 ## clear
-* clear the queue
+* clears the queue
 * Related Function ```player_ClearFunction```
 ## join , connect
-* join the current server
+* join the current Voice Channel that the command issuer is on
 * Related Function ```player_ConnectFunction```
 ## invite
-* provide invite link 
+* provide invite link of the bot
 * Related Function ```inviteFunction```
 ## leave , disconnect
-* leave the current server and clear the queue
+* leave the current voice channel and clear the queue
 * Related Function ```player_DisconnectFunction```
 ## loop , loopq
 * Toggle loop the current sound track or loop the current queue (Either on of them can be on at the same time)
 * Related Function ```player_LoopFunction``` and ```player_LoopQueueFunction```
 ## np
-* display the current sound track 
+* display the current sound track (unimplemented: time remaining etc.)
 * Related Function ```player_NowPlayingFunction```
 ## play, p [string / url]
 * Play the sound track searched on youtube (playlist not fully supported)
@@ -43,9 +43,11 @@
 * skip the current track
 * Related Function ```player_SkipFunction```
 ## seek
-* Currently not supported
+* Work in progress, Unimplemented command
 * Related Function ```player_SeekFunction```
-
+## shuffle
+* Work in progress, Unimplemented command
+* Related Function ```player_ShuffleFunction``` 
 
 
 
