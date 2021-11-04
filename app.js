@@ -121,8 +121,12 @@ function server_ResetPrefixFunction(client, message) {
 }
 function server_ChangePrefixFunction(client, message) {
 	let guildObj = server_getGuild(client, message);
-	guildObj.prefix = message.content.split(' ')[1];
-	message.channel.send(`New Prefix: ${guildObj.prefix}`);
+	if (message.content.split(' ')[1]) {
+		guildObj.prefix = message.content.split(' ')[1];
+		message.channel.send(`New Prefix: ${guildObj.prefix}`);
+	} else {
+		message.channel.send(`Incorrect Prefix ${message.content.split(' ')[1]}`);
+	}
 }
 
 //* message related
@@ -194,7 +198,8 @@ async function player_PlayFunction(client, message) {
 		guildObj.player.playNextSongifEnd(message, false, 0);
 		return;
 	}
-	if (!guildObj.player.connection || clientVC.members.size == 1) guildObj.player.connect(message, authorVC);
+	if (!guildObj.player.connection || !clientVC || clientVC.members.size == 1)
+		guildObj.player.connect(message, authorVC);
 	let addedSong = await guildObj.player.addSong(yt_search, url, message);
 	if (!addedSong) return message.channel.send('no sound track added');
 	message.channel.send('Added: ```' + guildObj.player.urlList.at(-1)[1] + ' ```');
@@ -354,17 +359,19 @@ client.on('messageCreate', async (message) => {
 	// consoleLogFormator('Recieved: ' + message.content);
 	if (message.author.bot) return;
 	let guildObj = server_getGuild(client, message);
-	if (message.mentions.members.first().id == message.guild.me.id && message.content.search('help') !== -1) {
-		return helpFunction(client, message);
+	if (message.mentions.members.first() && message.mentions.members.first().id == message.guild.me.id) {
+		if (message.content.toLocaleLowerCase().search('help') !== -1) return helpFunction(client, message);
+		if (message.content.toLocaleLowerCase().search('resetprefix') !== -1)
+			return server_ResetPrefixFunction(client, message);
 	}
 	//!!!!!!
-	let firstChar = message.content[0];
-	if (firstChar != guildObj.prefix || firstChar != PREFIX) return;
-	let firstArg = message.content.split(' ')[0].slice(1);
+	let firstChar = message.content.slice(0, guildObj.prefix.length);
+	// if (!(firstChar == guildObj.prefix || firstChar == PREFIX)) return;
+	let firstArg = message.content.split(' ')[0].slice(guildObj.prefix.length);
 	//
-	if (firstArg == 'resetprefix') {
-		return server_ResetPrefixFunction(client, message);
-	}
+	// if (firstArg == 'resetprefix') {
+	// 	return server_ResetPrefixFunction(client, message);
+	// }
 	// consoleLogFormator(`Recieved: ${firstArg}`);
 	if (firstChar != guildObj.prefix) return;
 	if (commandDict.hasOwnProperty(firstArg.toLowerCase())) {

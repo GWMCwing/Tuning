@@ -117,16 +117,20 @@ class PlayerObj {
 		this.currentResource.volume.setVolume(0.3);
 		this.player.play(this.currentResource);
 		//https://github.com/fent/node-ytdl-core/issues/932
-		const funcao = audioStream.listeners('error')[2];
-		audioStream.removeListener('error', funcao);
+		let funcao = audioStream.listeners('error');
+		// console.log(funcao);
+		funcao.forEach((fun) => {
+			audioStream.removeListener('error', fun);
+		});
+
 		audioStream.on('error', (err) => {
 			try {
 				throw new Error();
 			} catch {
 				audioStream.destroy();
 				console.log(err);
-				if (message) message.channel.send('Restart Due to Crashes');
-				setTimeout(this.playNextSongifEnd(message, true, 1), 500); // restart after 50 seconds
+				// if (message) message.channel.send('Restart Due to Crashes');
+				// setTimeout(this.playNextSongifEnd(message, true, 1), 500); // restart after 50 seconds
 			}
 		});
 
