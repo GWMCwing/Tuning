@@ -1,6 +1,7 @@
 const fs = require('fs');
 // additional req
 const { Client, Collection, Intents } = require('discord.js');
+const consoleLogFormator = require('./scr/console/consoleLogFormator');
 const { TOKEN, PREFIX } = require('./config.json');
 const { PlayerObj } = require('./player.js');
 const yt_search = require('yt-search');
@@ -15,6 +16,10 @@ const {
 	StreamType,
 } = require('@discordjs/voice');
 
+// import all files from ./scr
+fs.readdirSync('./scr').forEach((file) => {
+	require(`./scr/${file}`);
+});
 // // Create a new client instance
 const client = new Client({
 	intents: [
@@ -24,38 +29,6 @@ const client = new Client({
 		// Intents.FLAGS.GUILD_PRESENCES,
 	],
 });
-
-// console log function
-//TODO add type in front e.g. player, guild, bot
-//TODO color https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
-function consoleLogFormator(string, date = false) {
-	let hk_date_string = new Date().toLocaleString('en-US', { timeZone: 'Asia/Hong_Kong' });
-	let date_hk = new Date(hk_date_string);
-	// console.log(date_hk);
-	// hours as (HH) format
-	let hours = ('0' + date_hk.getHours()).slice(-2);
-
-	// minutes as (mm) format
-	let minutes = ('0' + date_hk.getMinutes()).slice(-2);
-
-	// seconds as (ss) format
-	let seconds = ('0' + date_hk.getSeconds()).slice(-2);
-
-	// time as hh:mm:ss format
-	let timeString = hours + ':' + minutes + ':' + seconds;
-
-	if (date) {
-		// month as (MM) format
-		let month = ('0' + (date_hk.getMonth() + 1)).slice(-2);
-
-		// date as (DD) format
-		let date = ('0' + date_hk.getDate()).slice(-2);
-		// date and time as YYYY-MM-DD hh:mm:ss format
-		timeString = date + '/' + month + ' - ' + timeString;
-	}
-
-	console.log('[' + timeString + '] ' + string);
-}
 
 // When the client is ready, run this code (only once)
 client.once('ready', () => {
