@@ -30,4 +30,6 @@ function consoleLogFormator(string, date = false) {
 	console.log('[' + timeString + '] ' + string);
 }
 
-module.exports(consoleLogFormator);
+//
+// Export
+module.exports = consoleLogFormator;
