@@ -1,5 +1,6 @@
 # AuditBot
-#### AuditBot is a small project created by a student to create and test discord bot application written in nodejs.
+#### AuditBot is a small project for creating discord music bot application with ease.
+Project is currently under factorization, files are rapidly changing its location. Refers to branch [moduleize](https://github.com/GWMCwing/AuditBot/tree/moduleize)
 
 #### Contributions are welcome and appreciated
 # Testing and Invite Link
@@ -7,7 +8,7 @@
 
 # Requirement for running the bot
 (Either of the following)
-#### 1. [Nodejs v16](https://nodejs.org/en/) or above (Please refers to Dockerfile for all the modules required)
+#### 1. [Nodejs v16](https://nodejs.org/en/) or above
 #### 2. [Docker](https://www.docker.com/)
 
 # Built-in Command 
