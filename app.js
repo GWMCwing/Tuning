@@ -1,9 +1,7 @@
 const fs = require('fs');
 // additional req
 const { Client, Collection, Intents } = require('discord.js');
-const consoleLogFormator = require('./scr/console/consoleLogFormator');
 const { TOKEN, PREFIX } = require('./config.json');
-const { PlayerObj } = require('./player.js');
 const yt_search = require('yt-search');
 const ytdl = require('ytdl-core');
 const {
@@ -16,10 +14,8 @@ const {
 	StreamType,
 } = require('@discordjs/voice');
 
-// import all files from ./scr
-fs.readdirSync('./scr').forEach((file) => {
-	require(`./scr/${file}`);
-});
+// require all needed files from ./scr
+const bot = require('./scr/');
 // // Create a new client instance
 const client = new Client({
 	intents: [
@@ -35,18 +31,10 @@ client.once('ready', () => {
 	consoleLogFormator('Ready!', true);
 });
 
-// command Below
-//
-
-// server Dict
+//TODO use Database to store all the data
 var serverDict = {};
 
-function getState(client, message) {
-	let s = server_getGuild(client, message).player.getState();
-	message.channel.send(`state: ${s}`);
-}
-
-// end of command function
+//? Could not think of another way to do this
 const commandDict = {
 	help: helpFunction,
 	invite: inviteFunction,
@@ -79,9 +67,9 @@ const commandDict = {
 	seek: player_SeekFunction,
 	clear: player_ClearFunction,
 	//
-	gs: getState,
+	// gs: getState,
 };
-
+// TODO Refactor
 // prefix command
 client.on('messageCreate', async (message) => {
 	// consoleLogFormator('Recieved: ' + message.content);

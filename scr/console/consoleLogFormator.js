@@ -32,4 +32,4 @@ function consoleLogFormator(string, date = false) {
 
 //
 // Export
-module.exports = consoleLogFormator;
+module.exports = { consoleLogFormator };

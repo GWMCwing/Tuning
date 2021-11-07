@@ -19,4 +19,4 @@ class serverClass {
 }
 //
 // Export
-module.exports = serverClass;
+module.exports = { serverClass };

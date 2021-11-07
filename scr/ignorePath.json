@@ -1,0 +1,7 @@
+
+{
+    "_comment":"Root file is not /scr/, please use './scr/...' ",
+    "ignorePathDir":[],
+    "ignorePathFile":["./scr/index.js","./scr/player/oldPlayerFunction.js"]
+
+}

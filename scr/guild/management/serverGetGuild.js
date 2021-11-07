@@ -11,4 +11,4 @@ function server_getGuild(client, message) {
 }
 //
 // Export
-module.exports = server_getGuild;
+module.exports = { server_getGuild };

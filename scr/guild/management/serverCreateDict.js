@@ -8,4 +8,4 @@ function server_createDict(client, message) {
 }
 //
 // Export
-module.exports = server_createDict;
+module.exports = { server_createDict };

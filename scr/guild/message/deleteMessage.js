@@ -4,4 +4,4 @@ async function removeMessageAfterSeconds(client, message, time) {
 	return true;
 }
 
-module.exports = removeMessageAfterSeconds;
+module.exports = { removeMessageAfterSeconds };

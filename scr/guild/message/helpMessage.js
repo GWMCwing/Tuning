@@ -7,4 +7,4 @@ function helpMessage(client, message) {
 	return message.channel.send(msg);
 }
 
-module.exports = helpMessage;
+module.exports = { helpMessage };

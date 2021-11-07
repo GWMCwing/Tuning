@@ -1,4 +1,4 @@
-const { getAuthorVCchannelFunction, getClientVCchannelFunction } = require('./getAuthorVCchannel.js');
+const { getAuthorVCchannelFunction, getClientVCchannelFunction } = require('./getVoiceChannel.js');
 //
 /**
  *
@@ -20,4 +20,4 @@ function checkAuthorInChannel(client, message) {
 	return [0, authorVC, clientVC];
 }
 
-module.exports = checkAuthorInChannel;
+module.exports = { checkAuthorInChannel };

@@ -5,4 +5,4 @@ function inviteFunction(client, message) {
 }
 //
 // Export
-module.exports = inviteFunction;
+module.exports = { inviteFunction };
