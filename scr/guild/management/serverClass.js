@@ -1,5 +1,6 @@
 const { PREFIX } = require('./../../../config.json');
 const { PlayerObj } = require('./../../player/playerClass');
+//! TODO REDO PLAYER OBJ
 class serverClass {
 	constructor(serverId) {
 		this.id = serverId;
