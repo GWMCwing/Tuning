@@ -5,7 +5,7 @@ const { consoleLogFormator } = require('./../console/consoleLogFormator');
  *
  * @param {string} url string of url
  * @param {number} seekTime number of seconds to seek
- * @return {ytdl.Stream} stream of audio from ytdl
+ * @return {ReadableStream} stream of audio from ytdl
  */
 async function getAudioStream(url, seekTime = 0) {
 	return await ytdl(url, {

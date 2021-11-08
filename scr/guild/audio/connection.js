@@ -24,8 +24,8 @@ const { getAuthorVCchannel } = require('../management/getVoiceChannel');
 // }
 /**
  * Connect to the message author channel
- * @param {client} client client Object
- * @param {message} message message Object
+ * @param {object} client client Object
+ * @param {object} message message Object
  * @return {boolean} true if the connection was successful
  */
 function audio_Connect(client, message) {
@@ -46,8 +46,8 @@ function audio_Connect(client, message) {
 
 /**
  * disconnect from the message author channel
- * @param {client} client client Object
- * @param {message} message message Object
+ * @param {object} client client Object
+ * @param {object} message message Object
  * @return {boolean} true if the disconnection was successful
  */
 function audio_Disconnect(client, message) {

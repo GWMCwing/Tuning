@@ -3,8 +3,8 @@ const { guildClass } = require('./guildClass');
 //
 /**
  * create server object
- * @param {client} client client object
- * @param {message} message message object
+ * @param {object} client client object
+ * @param {object} message message object
  * @returns {guildObj} guildobj object
  */
 function server_createGuildObj(client, message) {

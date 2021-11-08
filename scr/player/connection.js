@@ -2,9 +2,9 @@ const { joinVoiceChannel, getVoiceConnection } = require('@discordjs/voice');
 //
 /**
  * connect to voice channel
- * @param {PlayerObj} playerObj player object
- * @param {message} message message object
- * @param {VoiceChannel} channel Voice channel Object
+ * @param {object} playerObj player object
+ * @param {object} message message object
+ * @param {object} channel Voice channel Object
  */
 async function player_connect(playerObj, message, channel) {
 	if (!playerObj.player) await playerObj.init();
@@ -19,7 +19,7 @@ async function player_connect(playerObj, message, channel) {
 //
 /**
  * disconnect from voice channel
- * @param {PlayerObj} playerObj player object
+ * @param {object} playerObj player object
  */
 function player_disconnect(playerObj) {
 	if (playerObj.player) {
@@ -37,8 +37,8 @@ function player_disconnect(playerObj) {
 
 /**
  *
- * @param {PlayerObj} playerObj player object
- * @returns {VoiceConnection} voice connection
+ * @param {object} playerObj player object
+ * @returns {object} voice connection
  */
 function player_getConnection(playerObj) {
 	return getVoiceConnection(playerObj.guildObj.id);

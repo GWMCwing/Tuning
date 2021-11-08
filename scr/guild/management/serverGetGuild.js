@@ -2,8 +2,8 @@ const { server_createGuildObj } = require('./serverCreateDict.js');
 //
 /**
  * get guild object from server object
- * @param {client} client client object
- * @param {message} message message object
+ * @param {object} client client object
+ * @param {object} message message object
  * @param {serversObj} serversObj servers object
  * @returns {guildObj} guild object
  */
