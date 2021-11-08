@@ -1,6 +1,12 @@
 // console log function
 //TODO add type in front e.g. player, guild, bot
 //TODO color https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
+//
+/**
+ *
+ * @param {string} string string to be logged
+ * @param {boolean} date Append date to the log
+ */
 function consoleLogFormator(string, date = false) {
 	let hk_date_string = new Date().toLocaleString('en-US', { timeZone: 'Asia/Hong_Kong' });
 	let date_hk = new Date(hk_date_string);
@@ -28,6 +34,7 @@ function consoleLogFormator(string, date = false) {
 	}
 
 	console.log('[' + timeString + '] ' + string);
+	return true;
 }
 
 //

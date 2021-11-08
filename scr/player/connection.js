@@ -1,28 +1,51 @@
-const { consoleLogFormator } = require('./../console/consoleLogFormator');
-const { server_getGuild } = require('./../guild/management/serverGetGuild');
-const { checkAuthorInChannel } = require('./../guild/management/checkAuthorInChannel');
+const { joinVoiceChannel, getVoiceConnection } = require('@discordjs/voice');
 //
-function player_ConnectFunction(client, message) {
-	let guildObj = server_getGuild(client, message);
-	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
-	if (code == 11) return message.channel.send('Please wait until the queue ended');
-	if (code == 10) return message.channel.send('Please enter a Voice channel');
-	consoleLogFormator(`Trying to Connect VCchannel ID: ${authorVC.id} at ${guildObj.id}`);
-	//! connect to author channel
-	guildObj.player.connect(message, authorVC);
+/**
+ * connect to voice channel
+ * @param {PlayerObj} playerObj player object
+ * @param {message} message message object
+ * @param {VoiceChannel} channel Voice channel Object
+ */
+async function player_connect(playerObj, message, channel) {
+	if (!playerObj.player) await playerObj.init();
+	playerObj.connection = await joinVoiceChannel({
+		channelId: channel.id,
+		guildId: message.guild.id,
+		adapterCreator: channel.guild.voiceAdapterCreator,
+	});
+	playerObj.subscription = playerObj.connection.subscribe(playerObj);
+	//TODO Timeout
+}
+//
+/**
+ * disconnect from voice channel
+ * @param {PlayerObj} playerObj player object
+ */
+function player_disconnect(playerObj) {
+	if (playerObj.player) {
+		playerObj.player.stop();
+		playerObj.player = null;
+		playerObj.subscription.unsubscribe();
+		playerObj.subscription = null;
+	}
+	if (playerObj.connection) {
+		playerObj.connection.destroy();
+		playerObj.connection = null;
+	}
+	playerObj.resetStatus();
 }
 
-function player_DisconnectFunction(client, message) {
-	let [code, authorVC, clientVC] = checkAuthorInChannel(client, message);
-	if (code == 20) return message.channel.send('I am not in a Voice Channel');
-	if (code == 10) return message.channel.send('You are not in the same Voice Channel');
-	let guildObj = server_getGuild(client, message);
-	consoleLogFormator(`Trying to Connect VCchannel ID: ${clientVC.id} at ${guildObj.id}`);
-	//! disconenct
-	guildObj.player.disconnect();
+/**
+ *
+ * @param {PlayerObj} playerObj player object
+ * @returns {VoiceConnection} voice connection
+ */
+function player_getConnection(playerObj) {
+	return getVoiceConnection(playerObj.guildObj.id);
+}
+//* may remove
+function player_updateConnection(playerObj, connection = null) {
+	playerObj.connection = getConnection(playerObj);
 }
 
-module.exports = {
-	player_ConnectFunction,
-	player_DisconnectFunction,
-};
+module.exports = { player_connect, player_disconnect, player_getConnection, player_updateConnection };

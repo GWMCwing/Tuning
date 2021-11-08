@@ -1,4 +1,4 @@
-// require the files in the scr folder
+// require the files in the scr folder and export them
 const readline = require('readline');
 const fs = require('fs');
 const { ignorePathDir, ignorePathFile } = JSON.parse(fs.readFileSync('./scr/ignorePath.json'));

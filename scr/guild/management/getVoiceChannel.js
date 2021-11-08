@@ -1,11 +1,11 @@
-function getAuthorVCchannelFunction(client, message) {
+function getAuthorVCchannel(client, message) {
 	return message.member.voice.channel;
 }
-function getClientVCchannelFunction(client, message) {
+function getClientVCchannel(client, message) {
 	return message.guild.me.voice.channel;
 }
 
 module.exports = {
-	getAuthorVCchannelFunction,
-	getClientVCchannelFunction,
+	getAuthorVCchannel,
+	getClientVCchannel,
 };

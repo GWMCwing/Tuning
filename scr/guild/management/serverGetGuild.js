@@ -1,12 +1,19 @@
-const { server_createDict } = require('./serverCreateDict.js');
+const { server_createGuildObj } = require('./serverCreateDict.js');
 //
-function server_getGuild(client, message) {
+/**
+ * get guild object from server object
+ * @param {client} client client object
+ * @param {message} message message object
+ * @param {serversObj} serversObj servers object
+ * @returns {guildObj} guild object
+ */
+function server_getGuild(client, message, serversDict) {
 	let guildId = message.guildId;
-	if (serverDict.hasOwnProperty(guildId)) {
-		return serverDict[guildId];
+	if (serversDict.hasOwnProperty(guildId)) {
+		return serversDict[guildId];
 	} else {
-		serverDict[guildId] = server_createDict(client, message);
-		return serverDict[guildId];
+		serversDict[guildId] = server_createGuildObj(client, message);
+		return serversDict[guildId];
 	}
 }
 //

@@ -76,6 +76,7 @@ class PlayerObj {
 	updateConnection(connection = null) {
 		this.connection = this.getConnection();
 	}
+	//? not a stand along function
 	async idleTimeout(message, time = 5 * 1000 * 60, repeat = false) {
 		setTimeout(() => {
 			if (this.urlList.length == 0) {

@@ -1,11 +1,17 @@
 const { consoleLogFormator } = require('./../../console/consoleLogFormator');
-const { serverClass } = require('./serverClass');
+const { guildClass } = require('./guildClass');
 //
-function server_createDict(client, message) {
+/**
+ * create server object
+ * @param {client} client client object
+ * @param {message} message message object
+ * @returns {guildObj} guildobj object
+ */
+function server_createGuildObj(client, message) {
 	consoleLogFormator('creating guild Object id: ' + message.guildId);
-	let tempobj = new serverClass(message.guildId);
-	return tempobj;
+	let guildobj = new guildClass(message.guildId);
+	return guildobj;
 }
 //
 // Export
-module.exports = { server_createDict };
+module.exports = { server_createGuildObj };
