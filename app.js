@@ -1,107 +1,87 @@
-const fs = require('fs');
-// additional req
+// const fs = require('fs');
 const { Client, Collection, Intents } = require('discord.js');
 const { TOKEN, PREFIX } = require('./config.json');
-const yt_search = require('yt-search');
-const ytdl = require('ytdl-core');
-const {
-	joinVoiceChannel,
-	getVoiceConnection,
-	createAudioPlayer,
-	createAudioResource,
-	AudioPlayer,
-	AudioPlayerStatus,
-	StreamType,
-} = require('@discordjs/voice');
-
-// require all needed files from ./scr
-const bot = require('./scr/');
-// // Create a new client instance
+//
+const { consoleLogFormator } = require('./scr/console/consoleLogFormator');
+const { server_getGuild } = require('./scr/guild/management/serverGetGuild');
+const { helpMessage } = require('./scr/guild/message/helpMessage');
+const { commandHandler } = require('./scr/commandHandler');
+//
+// console.log('runing');
 const client = new Client({
 	intents: [
 		Intents.FLAGS.GUILDS,
 		Intents.FLAGS.GUILD_MESSAGES,
 		Intents.FLAGS.GUILD_VOICE_STATES,
-		// Intents.FLAGS.GUILD_PRESENCES,
+		// Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
 	],
 });
 
-// When the client is ready, run this code (only once)
 client.once('ready', () => {
 	consoleLogFormator('Ready!', true);
+	// console.log('ready');
 });
 
-//TODO use Database to store all the data
 var serverDict = {};
 
-//? Could not think of another way to do this
-const commandDict = {
-	help: helpFunction,
-	invite: inviteFunction,
-	//
-	changeprefix: server_ChangePrefixFunction,
-	resetprefix: server_ResetPrefixFunction,
-	//
-	join: player_ConnectFunction,
-	connect: player_ConnectFunction,
-
-	leave: player_DisconnectFunction,
-	disconnect: player_DisconnectFunction,
-	//
-	p: player_PlayFunction,
-	play: player_PlayFunction,
-	//
-	remove: player_RemoveFromListFunction,
-	rm: player_RemoveFromListFunction,
-	loop: player_LoopFunction,
-	loopq: player_LoopQueueFunction,
-	//
-	q: player_ListQueueFunction,
-	queue: player_ListQueueFunction,
-	np: player_NowPlayingFunction,
-	//
-	resume: player_ResumeFunction,
-	pause: player_PauseFunction,
-	//
-	skip: player_SkipFunction,
-	seek: player_SeekFunction,
-	clear: player_ClearFunction,
-	//
-	// gs: getState,
-};
-// TODO Refactor
-// prefix command
 client.on('messageCreate', async (message) => {
-	// consoleLogFormator('Recieved: ' + message.content);
 	if (message.author.bot) return;
-	let guildObj = server_getGuild(client, message);
-	if (message.mentions.members.first().id == message.guild.me.id && message.content.search('help') !== -1) {
-		return helpFunction(client, message);
-	}
-	//!!!!!!
-	let firstChar = message.content[0];
-	if (firstChar != guildObj.prefix || firstChar != PREFIX) return;
-	let firstArg = message.content.split(' ')[0].slice(1);
+	if (message.channel.type === 'dm') return;
+	let guildObj = server_getGuild(client, message, serverDict);
+	// handle mentioning the bot
+	if (handleHelpMessage(client, message, serverDict)) return;
 	//
-	if (firstArg == 'resetprefix') {
-		return server_ResetPrefixFunction(client, message);
-	}
-	// consoleLogFormator(`Recieved: ${firstArg}`);
-	if (firstChar != guildObj.prefix) return;
-	if (commandDict.hasOwnProperty(firstArg.toLowerCase())) {
+	if (handleMessageCommand(client, message, serverDict, guildObj)) return;
+});
+
+//
+/**
+ * parse the message and send the arguments to the command handler
+ *
+ * @param {object} client client object
+ * @param {object} message message object
+ * @param {object} serverDict serverDict object
+ * @param {object} guildObj guild object
+ * @returns
+ */
+function handleMessageCommand(client, message, serverDict, guildObj) {
+	let guildPrefix = guildObj.prefix;
+	if (message.content.startsWith(guildPrefix)) {
+		let command = message.content.split(' ')[0].slice(guildPrefix.length).toLowerCase();
+		let args = message.content.split(' ').slice(1);
 		try {
-			commandDict[firstArg](client, message);
+			commandHandler(client, message, guildObj, command, args);
 		} catch (error) {
-			//TODO add custom error to the log
-			consoleLogFormator(`Error occured\n        message: ${message.content}`, true);
+			consoleLogFormator(`Error occured\n     message: ${message}`, true);
 			console.log(error);
 		}
-	} else {
-		sentMessage = message.channel.send(`Unknown Command: ${firstArg}`);
-		removeMessageAfterSeconds(client, sentMessage, 3);
+		return true;
 	}
-});
-//
+	return false;
+}
 
-// Login to Discord with your client's token
+/**
+ * parse the message and send help command if needed
+ *
+ * @param {object} client
+ * @param {object} message
+ * @param {object} serverDict
+ * @returns
+ */
+
+function handleHelpMessage(client, message, serverDict) {
+	let messageMentions = message.mentions.members;
+	if (
+		messageMentions.size != 0 &&
+		messageMentions.first().id === client.user.id &&
+		message.content.search('help') !== -1
+	) {
+		helpMessage(client, message, serverDict);
+		return true;
+	}
+	return false;
+}
+
+// //
+//
 client.login(TOKEN);

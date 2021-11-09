@@ -1,5 +1,6 @@
 //
 const { createAudioPlayer, AudioPlayerStatus } = require('@discordjs/voice');
+
 class PlayerObj {
 	constructor(guildObj) {
 		this.guildObj = guildObj;
@@ -43,5 +44,4 @@ class PlayerObj {
 		this.idleTime = false;
 	}
 }
-
-exports.module = { PlayerObj };
+module.exports = { PlayerObj };
