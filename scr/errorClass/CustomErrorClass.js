@@ -13,5 +13,5 @@ class PropertyRequiredError extends ValidationError {
 	}
 }
 //
-//
+// Export
 module.exports = { ValidationError, PropertyRequiredError };

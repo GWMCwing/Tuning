@@ -11,8 +11,9 @@ function server_ChangePrefixFunction(client, message) {
 	guildObj.prefix = message.content.split(' ')[1];
 	message.channel.send(`New Prefix: ${guildObj.prefix}`);
 }
+
 //
-//
+// Export
 module.exports = {
 	server_ResetPrefixFunction,
 	server_ChangePrefixFunction,

@@ -3,6 +3,10 @@
     "_comment1":"This file is used for preventing unintended js files being required automatically",
     "_comment2":"Root file is not /scr/, please use './scr/...'",
     "ignorePathDir":[],
-    "ignorePathFile":["./scr/index.js","./scr/player/oldPlayerFunction.js,./scr/player/oldPlayerClass.js"]
+    "ignorePathFile":["./scr/index.js",
+                      "./scr/player/oldPlayerFunction.js",
+                      "./scr/player/oldPlayerClass.js",
+                      "./scr/commandHandler.js"
+                    ]
 
 }

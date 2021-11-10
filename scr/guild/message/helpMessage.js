@@ -14,4 +14,6 @@ function helpMessage(client, message, serversDict) {
 	return message.channel.send(msg);
 }
 
+//
+// Export
 module.exports = { helpMessage };

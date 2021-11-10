@@ -66,6 +66,8 @@ function audio_Disconnect(client, message) {
 	return true;
 }
 
+//
+// Export
 module.exports = {
 	audio_Connect,
 	audio_Disconnect,

@@ -44,4 +44,7 @@ class PlayerObj {
 		this.idleTime = false;
 	}
 }
+
+//
+// Export
 module.exports = { PlayerObj };

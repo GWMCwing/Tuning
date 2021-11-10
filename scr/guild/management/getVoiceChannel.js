@@ -5,6 +5,8 @@ function getClientVCchannel(client, message) {
 	return message.guild.me.voice.channel;
 }
 
+//
+// Export
 module.exports = {
 	getAuthorVCchannel,
 	getClientVCchannel,

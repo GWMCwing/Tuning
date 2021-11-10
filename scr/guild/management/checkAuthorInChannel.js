@@ -16,7 +16,7 @@ const { server_getGuild } = require('./serverGetGuild.js');
  * 20 => Client not in Voice channel
  * @param {object} client
  * @param {object} message
- * @return {(code:number,authorVoiceChannel:object,clientVoiceChannel:object)|array} [code, authorVoiceChannel, clientVoiceChannel]
+ * @return {(code:number,authorVoiceChannel:object,clientVoiceChannel:object)[]} [code, authorVoiceChannel, clientVoiceChannel]
  */
 function checkAuthorInChannel(client, message) {
 	let authorVC = getAuthorVCchannel(client, message);
@@ -28,4 +28,6 @@ function checkAuthorInChannel(client, message) {
 	return [0, authorVC, clientVC];
 }
 
+//
+// Export
 module.exports = { checkAuthorInChannel };
