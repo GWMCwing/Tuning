@@ -1,10 +1,14 @@
 const ytdl = require('ytdl-core');
-const fs = require('fs');
 
-const url = 'https://www.youtube.com/watch?v=e8xdG4zixgU';
-getInfo(url);
-async function getInfo(url) {
+const url = 'https://www.youtube.com/watch?v=6eTxcloeN00';
+
+async function main(url) {
 	let info = await ytdl.getBasicInfo(url);
-	info = ytdl.filterFormats(info.formats, { quality: 'highestaudio' });
-	fs.writeFileSync('./info.json', JSON.stringify(info.formats[0]), 'utf8');
+	console.log(info);
+	console.log(info.videoDetails.videoId);
+	console.log(info.videoDetails.video_url);
+	console.log(info.videoDetails.title);
+	console.log(info.videoDetails.thumbnail);
 }
+
+main(url);

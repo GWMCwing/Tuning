@@ -47,7 +47,9 @@ client.on('messageCreate', async (message) => {
 function handleMessageCommand(client, message, serverDict, guildObj) {
 	let guildPrefix = guildObj.prefix;
 	if (message.content.startsWith(guildPrefix)) {
-		let command = message.content.split(' ')[0].slice(guildPrefix.length).toLowerCase();
+		//TODO strip first command
+		let command = message.content.split(' ')[0].slice(guildPrefix.length).toLowerCase().trimEnd();
+		//
 		let args = message.content.split(' ').slice(1);
 		try {
 			commandHandler(client, message, guildObj, command, args);
@@ -82,6 +84,6 @@ function handleHelpMessage(client, message, serverDict) {
 	return false;
 }
 
-// //
+//
 //
 client.login(TOKEN);

@@ -6,7 +6,8 @@
     "ignorePathFile":["./scr/index.js",
                       "./scr/player/oldPlayerFunction.js",
                       "./scr/player/oldPlayerClass.js",
-                      "./scr/commandHandler.js"
+                      "./scr/commandHandler.js",
+                      "./scr/console/systemInfo.js"
                     ]
 
 }

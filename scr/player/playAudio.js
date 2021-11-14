@@ -9,20 +9,20 @@ const { consoleLogFormator } = require('./../console/consoleLogFormator');
  * @return {boolean} true if player subscription is valid, false if no url in playerObj.urlList
  */
 async function player_playAudio(playerObj, seekTime = 0) {
-	if (!playerObj.urlList.length) {
+	if (!playerObj.urlInfoList.length) {
 		consoleLogFormator('No url to play');
 		return false;
 	}
 	if (!playerObj.player) playerObj.init();
 	//
-	let url = playerObj.urlList[playerObj.currentSongIndex];
-	let audioStream = await getAudioStream(url, seekTime);
+	let ytdlInfo = playerObj.urlInfoList[playerObj.currentSongIndex];
+	let audioStream = await getAudioStream(ytdlInfo, seekTime);
 	//
 	playerObj.audioResource = await createAudioResource(audioStream, { inlineVolume: true });
 	playerObj.audioResource.setVolume(playerObj.volume);
 	playerObj.player.play(playerObj.audioResource);
 	// set error catcher
-	//* https://github.com/fent/node-ytdl-core/issues/932
+	//* reference https://github.com/fent/node-ytdl-core/issues/932
 	const funcao = audioStream.listeners('error')[2];
 	audioStream.removeListener('error', funcao);
 	audioStream.on('error', (err) => {
@@ -41,6 +41,10 @@ async function player_playAudio(playerObj, seekTime = 0) {
 	return true;
 }
 
+function playNextIfEnd(guildObj) {
+	//TODO
+}
+
 //
 // Export
-module.exports = { player_playAudio };
+module.exports = { player_playAudio, playNextIfEnd };

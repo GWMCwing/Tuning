@@ -1,5 +1,8 @@
 const { joinVoiceChannel, getVoiceConnection } = require('@discordjs/voice');
 //
+//!---------
+//! NEVER call these function in commandHandler
+//!---------
 /**
  * connect to voice channel
  * @param {object} playerObj player object

@@ -1,12 +1,12 @@
 const { server_getGuild } = require('./serverGetGuild');
 const { PREFIX } = require('./../../../config.json');
 //
-function server_ResetPrefixFunction(client, message) {
+function server_ResetPrefix(client, message) {
 	let guildObj = server_getGuild(client, message);
 	guildObj.prefix = PREFIX;
 	message.channel.send(`New Prefix: ${guildObj.prefix}`);
 }
-function server_ChangePrefixFunction(client, message) {
+function server_ChangePrefix(client, message) {
 	let guildObj = server_getGuild(client, message);
 	guildObj.prefix = message.content.split(' ')[1];
 	message.channel.send(`New Prefix: ${guildObj.prefix}`);
@@ -15,6 +15,6 @@ function server_ChangePrefixFunction(client, message) {
 //
 // Export
 module.exports = {
-	server_ResetPrefixFunction,
-	server_ChangePrefixFunction,
+	server_ResetPrefix,
+	server_ChangePrefix,
 };

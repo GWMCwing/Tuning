@@ -4,6 +4,7 @@ const { createAudioPlayer, AudioPlayerStatus } = require('@discordjs/voice');
 class PlayerObj {
 	constructor(guildObj) {
 		this.guildObj = guildObj;
+		this.urlInfoList = [];
 		this.urlList = [];
 		this.pause = false;
 		this.volume = 0.3;
@@ -29,8 +30,19 @@ class PlayerObj {
 			//TODO Play Next Song If End
 		});
 	}
+
+	addUrl(url, ytdlInfo) {
+		this.urlList.push(url);
+		this.urlInfoList.push(ytdlInfo);
+	}
+
+	removeUrlAtIndex(index) {
+		this.urlList.splice(index, 1);
+		this.urlInfoList.splice(index, 1);
+	}
+
 	resetStatus() {
-		this.urlList = [];
+		this.urlInfoList = [];
 		this.pause = false;
 		//
 		this.currentSong = null;
@@ -41,7 +53,8 @@ class PlayerObj {
 		this.loopSongBool = false;
 		this.loopQueueBool = false;
 		this.shuffleBool = false;
-		this.idleTime = false;
+		//TODO after reBuild
+		// this.idleTime = false;
 	}
 }
 
