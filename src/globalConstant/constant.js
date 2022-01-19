@@ -5,7 +5,7 @@
  */
 const globalConstant = {
 	/** @var {object} */
-	logginConstant: {
+	loggingConstant: {
 		/** @var {object} */
 		type: {
 			/** @var {intger} */
@@ -13,6 +13,11 @@ const globalConstant = {
 			info: 1,
 			warn: 2,
 			error: 3,
+		},
+		tag: {
+			runtime: 'runtime',
+			message: 'message',
+			command: 'command',
 		},
 	},
 };

@@ -1,21 +1,29 @@
 /**
- * dictionary implementation of commands
  * @global
+ * @description dictionary implementation of commands. The key is the command name and the value is the command object.
+ * The command Dictionary will also be used as the command deployment dictionary.
  * @var {object}
  */
 const commandDictionary = {
-	/** @var {object} */
 	help: {
-		/** @type {string} */
-		description: 'Displays this message.',
-		/** @type {function} */
-		function: helpFunction,
+		description: 'Displays help message.',
+		/** @type {Function} */
+		function: 'helpfunction',
 	},
 	ping: {
-		/** @type {string} */
-		/** @type {function} */
 		description: 'Pong!',
-		function: pingFunction,
+		/** @type {function} */
+		function: require('../general/ping'),
+	},
+	user: {
+		description: 'Displays your user information.',
+		/** @type {function} */
+		function: require('../client/clientInformation'),
+	},
+	server: {
+		description: 'Displays server information.',
+		/** @type {function} */
+		function: require('../guild/information/guildinfo'),
 	},
 };
 
@@ -43,4 +51,8 @@ function messageToCommandObject(command) {
 	return commandDictionary[command];
 }
 
-module.exports = { messageDestructor, messageToCommandObject };
+module.exports = {
+	messageDestructor,
+	messageToCommandObject,
+	commandDictionary,
+};
