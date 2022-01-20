@@ -1,6 +1,6 @@
 # AuditBot
 #### AuditBot is a small project for creating discord music bot application with ease.
-### *Project is currently under factorization, files are rapidly changing its location. Refers to branch [moduleize](https://github.com/GWMCwing/AuditBot/tree/moduleize)*
+### *Project is currently under factorization, files are rapidly changing its location. Refers to branch [rebuildv1](https://github.com/GWMCwing/AuditBot/tree/rebuildv1)*
 
 #### Contributions are welcome and appreciated
 # Testing and Invite Link
