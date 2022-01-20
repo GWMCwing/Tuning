@@ -28,7 +28,7 @@ client.on('interactionCreate', async (interaction) => {
 		logging(
 			loggingConstant.type.debug,
 			loggingConstant.tag.command,
-			`Interaction: Command: ${commandName}`
+			`Interaction Received: Command: ${commandName}`
 		);
 		const commandObject = messageToCommandObject(commandName);
 		if (commandObject) {
@@ -39,17 +39,18 @@ client.on('interactionCreate', async (interaction) => {
 		logging(
 			loggingConstant.type.debug,
 			loggingConstant.tag.command,
-			`Interaction: Button: ${buttonId}`
+			`Interaction Received: Button: ${buttonId}`
 		);
 	}
 });
-
+//
+//
 client.on('messageCreate', async (message) => {
 	if (message.content.startsWith(PREFIX)) {
 		logging(
 			loggingConstant.type.debug,
 			loggingConstant.tag.message,
-			`Message: ${message.content}`
+			`Message Received: ${message.content}`
 		);
 		let { command, args } = messageDestructor(message);
 		const commandObject = messageToCommandObject(command);

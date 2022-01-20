@@ -42,6 +42,7 @@ function logging(type, tag, message) {
 				'\x1b[31m%s\x1b[0m',
 				`${day}/${month}-${time} [ERROR] [${tag}] ${message}`
 			);
+			console.trace('\x1b[31m%s\x1b[0m', 'Error');
 			break;
 		default:
 			logging(

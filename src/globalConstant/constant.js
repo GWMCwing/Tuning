@@ -8,7 +8,6 @@ const globalConstant = {
 	loggingConstant: {
 		/** @var {object} */
 		type: {
-			/** @var {intger} */
 			debug: 0,
 			info: 1,
 			warn: 2,
