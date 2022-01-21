@@ -60,7 +60,7 @@ const commandDictionary = {
 		description: 'Displays your user information.',
 		options: [],
 		/** @type {function} */
-		function: require('../client/clientInformation'),
+		function: require('../user-client/information'),
 	},
 	server: {
 		name: 'server',
