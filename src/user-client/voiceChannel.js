@@ -24,7 +24,7 @@ function getClientVoiceChannel(
 		);
 	}
 	const recievedAction = interaction || message;
-	const client = recievedAction.guild.client;
+	const client = recievedAction.guild.me;
 	return client.voice.channel;
 }
 

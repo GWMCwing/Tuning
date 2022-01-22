@@ -1,20 +1,29 @@
 const logging = require('../console/logging');
 const { loggingConstant } = require('../globalConstant/constant');
-
+const { PREFIX } = require('../../config.json');
 const guildVarData = {};
 //
 class guild {
 	constructor(guildId) {
 		this.guildId = guildId;
 		this.playerObj = null;
+		this.prefix = PREFIX;
 	}
-    set playerObj() {
-        logging(loggingConstant.type.debug, loggingConstant.tag.runtime, `${this.guildId} playerObj set`);
-    }
-    get playerObj() {
-        logging(loggingConstant.type.debug, loggingConstant.tag.runtime, `${this.guildId} playerObj get`);
-    }
-    
+	set playerObj(newValue) {
+		logging(
+			loggingConstant.type.debug,
+			loggingConstant.tag.runtime,
+			`${this.guildId} playerObj set`
+		);
+	}
+	get playerObj() {
+		logging(
+			loggingConstant.type.debug,
+			loggingConstant.tag.runtime,
+			`${this.guildId} playerObj get`
+		);
+	}
+
 	addPlayerObj(playerObj) {
 		this.playerObj = playerObj;
 		return this.playerObj;
@@ -22,9 +31,9 @@ class guild {
 	removePlayerObj() {
 		this.playerObj = null;
 	}
-    getPlayerObj() {
-        return this.playerObj;
-    }
+	getPlayerObj() {
+		return this.playerObj;
+	}
 }
 //
 /**
@@ -42,7 +51,7 @@ function getGuildVarData() {
 }
 /**
  * @description get guild from guildVarData if guild is in guildVarData else will create a new guild and add to guildVarData
- * @param {Number} guildId 
+ * @param {Number} guildId
  * @returns {guild} guildObject from this module
  */
 function getGuildInGuildVarData(guildId) {
@@ -54,7 +63,7 @@ function getGuildInGuildVarData(guildId) {
 //
 /**
  * @description check if guild is in guildVarData
- * @param {Number} guildId 
+ * @param {Number} guildId
  * @returns {Boolean} true if guildId is in guildVarData
  */
 function isGuildInGuildVarData(guildId) {
@@ -63,7 +72,7 @@ function isGuildInGuildVarData(guildId) {
 //
 /**
  * @description add to guildVarData if guild is not in guildVarData
- * @param {Number} guildId 
+ * @param {Number} guildId
  * @returns {guild} guildObject from this module if it is not in guildVarData else return null
  */
 function addGuildToGuildVarData(guildId) {
@@ -79,7 +88,7 @@ function addGuildToGuildVarData(guildId) {
 }
 /**
  * @description remove guild from guildVarData
- * @param {Number} guildId 
+ * @param {Number} guildId
  * @returns {Boolean} true if guildId is removed from guildVarData else return false if guildId is not in guildVarData
  */
 function removeGuildFromGuildVarData(guildId) {

@@ -8,7 +8,9 @@ const {
 	messageToCommandObject,
 } = require('./src/command/commandHandler');
 // Create a new client instance
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+const client = new Client({
+	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+});
 
 // When the client is ready, run this code (only once)
 client.once('ready', () => {
@@ -32,7 +34,7 @@ client.on('interactionCreate', async (interaction) => {
 		);
 		const commandObject = messageToCommandObject(commandName);
 		if (commandObject) {
-			await commandObject.function((interaction = interaction));
+			await commandObject.function({ interaction: interaction });
 		}
 	} else if (interaction.isButton()) {
 		const { customId: buttonId } = interaction;
@@ -46,6 +48,7 @@ client.on('interactionCreate', async (interaction) => {
 //
 //
 client.on('messageCreate', async (message) => {
+	if (message.author.bot) return;
 	if (message.content.startsWith(PREFIX)) {
 		logging(
 			loggingConstant.type.debug,
@@ -55,7 +58,7 @@ client.on('messageCreate', async (message) => {
 		let { command, args } = messageDestructor(message);
 		const commandObject = messageToCommandObject(command);
 		if (commandObject) {
-			await commandObject.function((message = message), (args = args));
+			await commandObject.function({ message: message, args: args });
 		}
 	}
 });

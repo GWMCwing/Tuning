@@ -1,25 +1,24 @@
 const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
+const {
+	validateInteractionMessageArgs,
+} = require('../command/commandValidator');
 const logging = require('../console/logging');
 const { loggingConstant } = require('../globalConstant/constant');
 
 /**
  *  template for different types of message or interaction handling
  *  and the parameter handling methods
- * @param {Object} interaction - the interaction object from discord.js
- * @param {Object} message - the message object from discord.js
- * @param {String[]} args - the arguments from the message
+ * @param {object?} interaction - the interaction object from discord.js
+ * @param {object?} message - the message object from discord.js
+ * @param {string[]?} args - the arguments from the message
  * @returns
  */
 async function pingPong(interaction = null, message = null, args = null) {
 	// prevent missing interaction or message
 	//TODO send message to user if missing
 	// if((!interaction ^ !message) and ! args) for requiring args
-	if (!(!interaction ^ !message)) {
-		return logging(
-			loggingConstant.type.error,
-			loggingConstant.tag.runtime,
-			'pingPong: Missing interaction or message'
-		);
+	if (!validateInteractionMessageArgs(interaction, message, args, 'pingPong')) {
+		return;
 	}
 	//
 	const recievedAction = interaction || message;

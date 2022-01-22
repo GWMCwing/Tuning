@@ -10,7 +10,7 @@ const commands = [];
 // start building the slash command
 logging(
 	loggingConstant.type.info,
-	loggingConstant.tag.runtime,
+	loggingConstant.tag.buildCommand,
 	`Building Commands...`
 );
 for (const commandName in commandDictionary) {
@@ -19,9 +19,16 @@ for (const commandName in commandDictionary) {
 	buildSlashCommand(slashCommandObject, commandName, commandObject);
 	commands.push(slashCommandObject.toJSON());
 }
+if (Object.keys(commandDictionary).length === 0) {
+	logging(
+		loggingConstant.type.warn,
+		loggingConstant.tag.buildCommand,
+		`No Commands Found.`
+	);
+}
 logging(
 	loggingConstant.type.info,
-	loggingConstant.tag.runtime,
+	loggingConstant.tag.buildCommand,
 	`Build Complete...`
 );
 
@@ -32,12 +39,12 @@ rest
 	.then(() =>
 		logging(
 			loggingConstant.type.info,
-			loggingConstant.tag.runtime,
+			loggingConstant.tag.buildCommand,
 			'Successfully registered application commands.'
 		)
 	)
 	.catch((error) =>
-		logging(loggingConstant.type.error, loggingConstant.tag.runtime, error)
+		logging(loggingConstant.type.error, loggingConstant.tag.buildCommand, error)
 	);
 //
 // end of main building
@@ -47,7 +54,7 @@ function buildSlashCommand(slashCommandObject, name, commandObject) {
 	// commandObject will be the object that contains the command information
 	logging(
 		loggingConstant.type.info,
-		loggingConstant.tag.runtime,
+		loggingConstant.tag.buildCommand,
 		`Building Slash Command: ${name}`
 	);
 	const { options } = commandObject;
@@ -56,7 +63,7 @@ function buildSlashCommand(slashCommandObject, name, commandObject) {
 	if (commandObject.name !== name)
 		return logging(
 			loggingConstant.type.error,
-			loggingConstant.tag.runtime,
+			loggingConstant.tag.buildCommand,
 			`Name does not match. ${name} !== ${commandObject.name}\nBuild for this Command Aborted.`
 		);
 	// basic command => /command
@@ -73,7 +80,11 @@ function buildSlashCommand(slashCommandObject, name, commandObject) {
 			typeToCommand(slashCommandObject, commandObjectOption);
 		}
 	}
-	logging(loggingConstant.type.info, loggingConstant.tag.runtime, `Done...`);
+	logging(
+		loggingConstant.type.info,
+		loggingConstant.tag.buildCommand,
+		`Done...`
+	);
 }
 /**
  * @description map the type to the correct function for adding corresponding option
@@ -87,7 +98,7 @@ function typeToCommand(slashCommandObject, commandObject, parentType = null) {
 	if (parentType === 2 && type !== 1)
 		throw logging(
 			loggingConstant.type.error,
-			loggingConstant.tag.runtime,
+			loggingConstant.tag.buildCommand,
 			`Parent is a Sub Command Group, but child is not a Sub Command.\nBuild for this Command Aborted.`
 		);
 	switch (type) {
@@ -142,7 +153,7 @@ function typeToCommand(slashCommandObject, commandObject, parentType = null) {
 		default:
 			logging(
 				loggingConstant.type.error,
-				loggingConstant.tag.runtime,
+				loggingConstant.tag.buildCommand,
 				'Invalid option type.\n' + JSON.stringify(commandObject, null, 2)
 			);
 			break;
@@ -338,7 +349,7 @@ function addBasicOptionInfo(commandBuilder, commandObject, addRequire = true) {
 	const { name, description } = commandObject;
 	logging(
 		loggingConstant.type.debug,
-		loggingConstant.tag.runtime,
+		loggingConstant.tag.buildCommand,
 		`Adding Basic Option Info: ${commandObject.name}`
 	);
 	commandBuilder.setName(name).setDescription(description);
@@ -363,7 +374,7 @@ function checkNameDescription(commandObject) {
 function errorNameDescriptionDNE(commandObject) {
 	logging(
 		loggingConstant.type.error,
-		loggingConstant.tag.runtime,
+		loggingConstant.tag.buildCommand,
 		`Name or Description is not defined.\n` +
 			JSON.stringify(commandObject, null, 2)
 	);
@@ -380,7 +391,7 @@ function warnOptionDNE(commandObject, error = false) {
 	}
 	logging(
 		loggingType,
-		loggingConstant.tag.runtime,
+		loggingConstant.tag.buildCommand,
 		`Options is not an array or does not exist.\n` +
 			JSON.stringify(commandObject, null, 2) +
 			'\nUse `options: []` to supress this warning'
@@ -389,7 +400,7 @@ function warnOptionDNE(commandObject, error = false) {
 function warnOptionDNS(commandObject, type) {
 	logging(
 		loggingConstant.type.warn,
-		loggingConstant.tag.runtime,
+		loggingConstant.tag.buildCommand,
 		`Options is not supported in ${type}\n` +
 			JSON.stringify(commandObject, null, 2)
 	);
@@ -402,7 +413,7 @@ function warnOptionDNS(commandObject, type) {
 function warnChoiceDNS(commandObject, type) {
 	logging(
 		loggingConstant.type.warn,
-		loggingConstant.tag.runtime,
+		loggingConstant.tag.buildCommand,
 		`${type} option does not support choices.\n` +
 			JSON.stringify(commandObject, null, 2)
 	);
@@ -415,7 +426,7 @@ function warnChoiceDNS(commandObject, type) {
 function debugBuilderOptionStart(commandObject, type) {
 	logging(
 		loggingConstant.type.debug,
-		loggingConstant.tag.runtime,
+		loggingConstant.tag.buildCommand,
 		`Adding ${type} option ${commandObject.name}`
 	);
 }
@@ -427,7 +438,7 @@ function debugBuilderOptionStart(commandObject, type) {
 function debugBuilderOptionEnd(commandObject, type) {
 	logging(
 		loggingConstant.type.debug,
-		loggingConstant.tag.runtime,
+		loggingConstant.tag.buildCommand,
 		`Added ${type} option ${commandObject.name}...`
 	);
 }
