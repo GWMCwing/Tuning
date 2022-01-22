@@ -3,7 +3,10 @@ const { validateInteractionMessage } = require('../command/commandValidator');
 const logging = require('../console/logging');
 const { loggingConstant } = require('../globalConstant/constant');
 const { getGuildInGuildVarData } = require('../guild/guildData');
-const { checkPermissionInChannel } = require('../general/checkForPermission');
+const {
+	checkPermissionInChannel,
+	missPermissionInMessageChannel,
+} = require('./permission');
 /**
  * @description reply to the user with a help message
  * @param {object?} interaction
@@ -11,17 +14,23 @@ const { checkPermissionInChannel } = require('../general/checkForPermission');
  * @param {string[]?} args
  */
 async function replyHelpMessage({ interaction, message, args }) {
+	//! must have these lines
 	validateInteractionMessage(interaction, message, 'replyHelpMessage');
 	const recievedAction = interaction || message;
-	if (!checkPermissionInChannel(recievedAction, 'SEND_MESSAGES')) {
-		logging(
-			loggingConstant.type.warn,
-			loggingConstant.tag.command,
-			`User does not have permission to send messages in this channel
-			guildId: ${recievedAction.guild.id}`
-		);
-	}
+	const requirePermissions = ['SEND_MESSAGES', 'EMBED_LINKS'];
 	const client = recievedAction.guild.me;
+	if (!checkPermissionInChannel(recievedAction, requirePermissions)) {
+		const author = recievedAction.author || recievedAction.user;
+		missPermissionInMessageChannel(
+			'Help',
+			author,
+			client,
+			recievedAction,
+			requirePermissions
+		);
+		return;
+	}
+	//!
 	const serverPrefix = getGuildInGuildVarData(recievedAction.guild.id).prefix;
 	const embed = new MessageEmbed()
 		.setColor('#0099ff')
