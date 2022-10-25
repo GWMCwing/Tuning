@@ -13,11 +13,11 @@ const clientIntent : ClientOptions = {
 }
 const client = new Client(clientIntent);
 
-client.once(Events.ClientReady, (c)=>{
+client.once(Events.ClientReady, async (c)=>{
     logger.log('Client', 'Client is ready');
 });
 
-client.on(Events.MessageCreate,(message)=>{
+client.on(Events.MessageCreate, async (message)=>{
     logger.log('Client', `Message received: ${message.content}`);
     inputHandler(message);
 })
