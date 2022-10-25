@@ -1,0 +1,21 @@
+{
+    "extends":"@tsconfig/node16/tsconfig.json",
+    "compilerOptions": {
+      "module": "commonjs",
+      "esModuleInterop": true,
+      "target": "es6",
+      "moduleResolution": "node",
+      "resolveJsonModule": true,
+      "sourceMap": true,
+      "outDir": "bin",
+      "strictNullChecks": true,
+      "strictFunctionTypes": true,
+      "noImplicitAny": true,
+      "noImplicitOverride": true,
+      "noImplicitReturns": true,
+      "removeComments": true,
+    },
+    "lib": ["es2021"],
+    "include": ["src/**/*"],
+    "exclude": ["node_modules"]
+}
