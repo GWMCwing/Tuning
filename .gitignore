@@ -5,3 +5,5 @@ config.json
 /OldBot
 botConfig.json
 /bin
+./*.js
+*.old
