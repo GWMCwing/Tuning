@@ -211,7 +211,7 @@ export class previousTrackChannelCommand extends CommandBase {
             .allowText()
             .allowGuild()
             .build();
-        const aliases: string[] = [];
+        const aliases: string[] = ['prev'];
         super(name, description, usage, aliases);
     }
     async execute_Interaction(interaction: Interaction): Promise<boolean> {
@@ -265,6 +265,40 @@ export class displayQueueCommand extends CommandBase {
                 break;
             }
         }
+        message.reply(reply);
+        return true;
+    }
+}
+
+export class displayNowPlayingCommand extends CommandBase {
+    constructor() {
+        const name = 'nowplaying';
+        const description = 'display current song in queue';
+        const usage = new CommandUsageBuilder(name)
+            .allowText()
+            .allowGuild()
+            .build();
+        const aliases = ['np'];
+        super(name, description, usage, aliases);
+    }
+    async execute_Interaction(interaction: Interaction): Promise<boolean> {
+        return false;
+    }
+    async execute_Message(message: Message, args: string[]): Promise<boolean> {
+        if (!message.guild) return false;
+        const queue = guildManager
+            .getGuild(message.guild.id)
+            .musicPlayer.getQueue();
+
+        const npId = guildManager
+            .getGuild(message.guild.id)
+            .musicPlayer.nowPlaying();
+        if (queue.length === 0) {
+            message.reply('Nothing is playing... Weird.');
+            return true;
+        }
+        let reply = 'Currently playing:\n';
+        reply += `${npId + 1}: ${queue[npId].title}\n`;
         message.reply(reply);
         return true;
     }

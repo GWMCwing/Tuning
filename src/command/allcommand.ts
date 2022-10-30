@@ -11,6 +11,7 @@ import {
     previousTrackChannelCommand,
     resumeTrackChannelCommand,
     skipTrackChannelCommand,
+    displayNowPlayingCommand,
 } from './voice/music';
 
 export async function loadAllCommands(): Promise<void> {
@@ -25,6 +26,7 @@ export async function loadAllCommands(): Promise<void> {
         commandManager.setCommand(new previousTrackChannelCommand()),
         commandManager.setCommand(new resumeTrackChannelCommand()),
         commandManager.setCommand(new skipTrackChannelCommand()),
+        commandManager.setCommand(new displayNowPlayingCommand()),
     ]);
 
     logger.debug('CommandManager', 'All commands Loaded');

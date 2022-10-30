@@ -134,6 +134,10 @@ export class MusicPlayer {
     getTrackInfo_Index(index: number): TrackInfo | undefined {
         return this.queue.get(this.queueIndex[index]);
     }
+
+    nowPlaying(): number {
+        return this.trackPlayingIndex;
+    }
     //
 
     async addToQueue(url: string): Promise<TrackInfo[]> {
