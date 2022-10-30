@@ -4,7 +4,9 @@
         "ytdl"
     ],
     "cSpell.ignoreWords": [
+        "discordjs",
         "highestaudio",
+        "ytpl",
         "ytsr"
     ]
 }

@@ -20,9 +20,18 @@ const clientIntent: ClientOptions = {
 const client = new Client(clientIntent);
 //
 //
-
 client.once(Events.ClientReady, async (c) => {
     logger.log('Client', 'Client is ready');
+    client.user?.setPresence({
+        activities: [
+            {
+                name: 'Migrating to Discord.js v14 and Typescript',
+                type: ActivityType.Playing,
+                url: 'https://github.com/GWMCwing/AuditBot',
+            },
+        ],
+        status: 'online',
+    });
 });
 
 client.on(Events.MessageCreate, async (message) => {
@@ -32,14 +41,3 @@ client.on(Events.MessageCreate, async (message) => {
 });
 
 client.login(TOKEN);
-
-client.user?.setPresence({
-    activities: [
-        {
-            name: 'You',
-            type: ActivityType.Playing,
-            url: 'https://github.com/GWMCwing/AuditBot',
-        },
-    ],
-    status: 'online',
-});
