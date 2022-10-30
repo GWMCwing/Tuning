@@ -87,9 +87,14 @@ export class playTrackChannelCommand extends CommandBase {
             return false;
         }
         //
-        const success = await musicPlayer.addToQueue(args[0]);
-        if (success) {
-            message.reply(`Added ${success} track(s) to queue`);
+        const trackList = await musicPlayer.addToQueue(args.join(' '));
+        if (trackList) {
+            if (trackList.length > 1) {
+                //TODO send message with list of tracks, using interactive message
+                message.reply(`Added ${trackList.length} track(s) to queue`);
+            } else {
+                message.reply(`Added ${trackList[0].title} track to queue`);
+            }
             connection.subscribe(musicPlayer.getPlayer());
             if (musicPlayer.play()) return true;
             else {
@@ -251,7 +256,11 @@ export class displayQueueCommand extends CommandBase {
         }
         let reply = 'The queue is:\n';
         for (let i = 0; i < queue.length; i++) {
-            reply += `${i + 1}: ${JSON.stringify(queue[i], null, 2)}\n`;
+            reply += `${i + 1}: ${queue[i].title}\n`;
+            if (reply.length > 200) {
+                reply += `...(${queue.length - i} more)`;
+                break;
+            }
         }
         message.reply(reply);
         return true;

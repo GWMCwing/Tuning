@@ -7,3 +7,4 @@ botConfig.json
 /bin
 ./*.js
 *.old
+/error

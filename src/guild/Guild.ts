@@ -1,6 +1,6 @@
 import { Guild, GuildMember } from 'discord.js';
 import { PREFIX } from '../../config.json';
-import { MusicPlayer } from '../feature/music/music';
+import { MusicPlayer } from '../feature/music/MusicPlayer';
 
 interface GuildConfig {
     prefix: string;

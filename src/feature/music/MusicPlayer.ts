@@ -44,6 +44,8 @@ function* trackIndexGenerator(): IterableIterator<number> {
     }
 }
 
+const getTrackIndexGenerator = trackIndexGenerator();
+
 export class MusicPlayer {
     //
     constructor(guildId: string, config?: MusicPlayerConfig) {
@@ -86,7 +88,9 @@ export class MusicPlayer {
             return true;
         }
         // TODO handle auto pause (no subscriber)
-
+        if (this.audioPlayer.state.status === AudioPlayerStatus.Playing) {
+            return true;
+        }
         return false;
     }
     playNext(): boolean {
@@ -132,26 +136,28 @@ export class MusicPlayer {
     }
     //
 
-    async addToQueue(url: string): Promise<number> {
+    async addToQueue(url: string): Promise<TrackInfo[]> {
+        url = url.trim();
+        if (url === '') return [];
         switch (getLinkType(url)) {
             case 'YOUTUBE_VIDEO':
                 const videoTrack = await getTrackInfoFromUrl_youtube_video(url);
                 this.setToQueue(videoTrack.id, videoTrack);
-                return 1;
+                return [videoTrack];
             case 'YOUTUBE_PLAYLIST':
                 const playlistTrack =
                     await getTrackInfoFromUrl_youtube_playList(url);
                 for (let i = 0; i < playlistTrack.length; i++) {
                     this.setToQueue(playlistTrack[i].id, playlistTrack[i]);
                 }
-                return playlistTrack.length;
+                return playlistTrack;
             default:
                 const track = await getTrackInfoFromUrl_Default(url);
                 if (track) {
                     this.setToQueue(track.id, track);
-                    return 1;
+                    return [track];
                 }
-                return 0;
+                return [];
         }
     }
     //
@@ -168,6 +174,15 @@ export class MusicPlayer {
                 this.updateTrackIndex();
                 this.playSpecificAudioTrack(this.trackPlayingIndex);
             }
+        });
+        audioPlayer.on('error', (error) => {
+            logger.error(
+                'player',
+                error.name,
+                error.message,
+                JSON.stringify(error.resource, null, 2),
+                error.stack!
+            );
         });
         return audioPlayer;
     }
@@ -202,6 +217,7 @@ export class MusicPlayer {
         this.trackPlayingIndex++;
         if (this.trackPlayingIndex >= this.queue.size) {
             this.trackPlayingIndex--;
+            this.audioPlayer.stop();
             return 'END_OF_PLAYLIST';
         }
         //
@@ -211,6 +227,7 @@ export class MusicPlayer {
         if (this.queue.size === 0) return 'NO_TRACK';
         this.trackPlayingIndex--;
         if (this.trackPlayingIndex < 0) {
+            this.audioPlayer.stop();
             this.trackPlayingIndex++;
             return 'END_OF_PLAYLIST';
         }
@@ -263,11 +280,11 @@ async function getTrackInfoFromUrl_youtube_video(
     const track: TrackInfo = {
         title: info.videoDetails.title,
         url: info.videoDetails.video_url,
-        thumbnail: info.videoDetails.thumbnail.thumbnails[0].url,
+        thumbnail: info.videoDetails.thumbnails[0].url,
         channelName: info.videoDetails.author.name,
         channelUrl: info.videoDetails.author.channel_url,
         length: Number(info.videoDetails.lengthSeconds) * 1000,
-        id: trackIndexGenerator().next().value,
+        id: getTrackIndexGenerator.next().value,
         type: 'YOUTUBE_VIDEO',
     };
     return track;
@@ -287,7 +304,7 @@ async function getTrackInfoFromUrl_youtube_playList(
             channelName: item.author.name,
             channelUrl: item.author.url,
             length: Number(item.durationSec) * 1000,
-            id: trackIndexGenerator().next().value,
+            id: getTrackIndexGenerator.next().value,
             type: 'YOUTUBE_VIDEO',
         };
         tracks.push(track);
@@ -308,7 +325,7 @@ async function getTrackInfoFromUrl_Default(
             channelName: video.author.name,
             channelUrl: video.author.url,
             length: Number(video.duration.seconds) * 1000,
-            id: trackIndexGenerator().next().value,
+            id: getTrackIndexGenerator.next().value,
             type: 'YOUTUBE_VIDEO',
         };
         return track;
@@ -318,11 +335,11 @@ async function getTrackInfoFromUrl_Default(
 //
 
 function getLinkType(url: string): linkType {
-    if (ytdl.validateURL(url)) {
-        return 'YOUTUBE_VIDEO';
-    }
     if (ytpl.validateID(url)) {
         return 'YOUTUBE_PLAYLIST';
+    }
+    if (ytdl.validateURL(url)) {
+        return 'YOUTUBE_VIDEO';
     }
     return 'UNKNOWN';
 }
@@ -337,6 +354,7 @@ function getAudioStream(
                 filter: 'audioonly',
                 quality: 'highestaudio',
                 range: { start: seekTime },
+                highWaterMark: 1 << 25,
             });
         default:
             return null;
