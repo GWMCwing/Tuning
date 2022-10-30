@@ -1,5 +1,6 @@
-import { Guild, GuildMember, User } from 'discord.js';
+import { Guild, GuildMember } from 'discord.js';
 import { PREFIX } from '../../config.json';
+import { MusicPlayer } from '../feature/music/music';
 
 interface GuildConfig {
     prefix: string;
@@ -10,6 +11,7 @@ export class GuildProperty {
     constructor(id: string) {
         this._id = id;
         this._GuildConfig = { prefix: PREFIX };
+        this._musicPlayer = new MusicPlayer(id);
     }
     // no setter for _id and _GuildConfig
     get id(): string {
@@ -18,8 +20,12 @@ export class GuildProperty {
     get GuildConfig(): GuildConfig {
         return this._GuildConfig;
     }
+    get musicPlayer(): MusicPlayer {
+        return this._musicPlayer;
+    }
     private _id: string;
     private _GuildConfig: GuildConfig;
+    private _musicPlayer: MusicPlayer;
 }
 
 class GuildManager {
@@ -35,6 +41,7 @@ class GuildManager {
             return guild;
         }
     }
+
     private _guilds: Map<string, GuildProperty>;
 }
 

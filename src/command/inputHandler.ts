@@ -2,36 +2,78 @@ import { Interaction, Message } from 'discord.js';
 import { logger } from '../util/logger';
 import { PREFIX } from '../../config.json';
 import { CommandBase } from './commandBase';
-import { MusicPlayer } from '../feature/music/music';
 // import all commands here
-
-interface CommandMap {
-    [key: string]: CommandBase;
+import { loadAllCommands } from './allCommand';
+//
+class CommandManager {
+    constructor() {
+        logger.debug('CommandManager', 'Initializing command manager');
+        if (CommandManager._instance) {
+            return CommandManager._instance;
+        }
+        CommandManager._instance = this;
+    }
+    getCommand(name: string): CommandBase | null {
+        return this.commands.get(name) || null;
+    }
+    async setCommand(command: CommandBase): Promise<void> {
+        const nameList = [command.name, ...command.aliases];
+        const nameListLength = nameList.length;
+        const registeredList = [];
+        logger.debug('CommandManager', `Registering command *${command.name}*`);
+        for (let i = 0; i < nameListLength; i++) {
+            const name = nameList[i];
+            if (this.commands.has(name)) {
+                if (i == 0) {
+                    logger.warn(
+                        'CommandManager',
+                        `Command *${name}* already registered, skipping registration for this command`
+                    );
+                    break;
+                }
+                logger.warn(
+                    'CommandManager',
+                    `Command ${command.name} with alias *${name}* already registered, skipping alias`
+                );
+                continue;
+            }
+            registeredList.push(name);
+            this.commands.set(name, command);
+        }
+        logger.debug(
+            'CommandManager',
+            `Registered command *${
+                command.name
+            }* with aliases ${registeredList.join(
+                ', '
+            )}, total registered commands: ${registeredList.length}`
+        );
+    }
+    private static _instance: CommandManager;
+    private commands: Map<string, CommandBase> = new Map<string, CommandBase>();
 }
 
-const commandMap: CommandMap = {};
-
-function generateCommandMap() {}
-
 function parseCommand(commandName: string): CommandBase | null {
-    const command = commandMap[commandName];
+    const command = commandManager.getCommand(commandName);
     if (command) {
         return command;
-    } else {
-        return null;
     }
+    return null;
 }
 
 function inputHandler_text(message: Message): void {
     if (message.content.startsWith(PREFIX)) {
         const input = message.content.substring(PREFIX.length);
         const commandName = input.split(' ')[0];
-        const args = input.substring(commandName.length).trim();
-        logger.log('InputHandler', `Command: ${commandName}, Args: ${args}`);
+        const args = input.split(' ').slice(1);
+        logger.log(
+            'InputHandler',
+            `Command: ${commandName}, Args: ${args.join(',')}`
+        );
         //
         const command = parseCommand(commandName);
         if (command) {
-            command.execute(message, args);
+            command.execute_Message(message, args);
         } else {
             message.reply(`Command ${commandName} not found`);
         }
@@ -47,3 +89,6 @@ export function inputHandler(message: Message | Interaction): void {
         inputHandler_interaction(message);
     }
 }
+
+export const commandManager = new CommandManager();
+loadAllCommands();

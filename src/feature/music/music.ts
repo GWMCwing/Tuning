@@ -9,6 +9,9 @@ import {
     CreateAudioPlayerOptions,
     NoSubscriberBehavior,
     AudioPlayerState,
+    AudioPlayerStatus,
+    AudioPlayerIdleState,
+    AudioPlayerPausedState,
 } from '@discordjs/voice';
 const yts = require('yt-search');
 const ytpl = require('ytpl');
@@ -43,9 +46,10 @@ function* trackIndexGenerator(): IterableIterator<number> {
 
 export class MusicPlayer {
     //
-    constructor(guildId: string, config: MusicPlayerConfig) {
+    constructor(guildId: string, config?: MusicPlayerConfig) {
         this.guildId = guildId;
-        this.config = config;
+        if (config) this.config = config;
+        else this.config = {};
         this.queue = new Map();
         this.queueIndex = [];
     }
@@ -70,6 +74,20 @@ export class MusicPlayer {
     }
     resume(): boolean {
         return this.audioPlayer.unpause();
+    }
+    play(): boolean {
+        logger.debug('player', 'status: ' + this.audioPlayer.state.status);
+        if (
+            this.audioPlayer.state.status === AudioPlayerStatus.Idle ||
+            this.audioPlayer.state.status === AudioPlayerStatus.Paused ||
+            this.audioPlayer.state.status === AudioPlayerStatus.AutoPaused
+        ) {
+            this.playNextAudioTrack();
+            return true;
+        }
+        // TODO handle auto pause (no subscriber)
+
+        return false;
     }
     playNext(): boolean {
         return this.playNextAudioTrack() === 'NONE';
@@ -223,7 +241,7 @@ export class MusicPlayer {
     private config: MusicPlayerConfig;
     private loopState: LoopState = 'NONE';
     private randomState: boolean = false;
-    private trackPlayingIndex: number = 0;
+    private trackPlayingIndex: number = -1;
     private trackStream: NodeJS.ReadableStream | null = null;
     private queue: Map<number, TrackInfo>;
     private queueIndex: number[];

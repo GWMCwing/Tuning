@@ -19,16 +19,15 @@ export async function getUserVoiceChannel(
     guild?: Guild
 ): Promise<VoiceBasedChannel | null> {
     let user: GuildMember | null;
-    if (param1 instanceof GuildMember) {
+    if (param1 instanceof GuildMember && guild === undefined) {
         user = param1;
     } else if (typeof param1 === 'string' && guild) {
         user = await getGuildUser(guild, param1);
     } else {
+        // impossible
         throw new Error('Invalid parameters');
     }
-    if (user) {
-        return user.voice.channel;
-    }
+    if (user) return user.voice.channel;
     return null;
 }
 
