@@ -83,6 +83,9 @@ export class playTrackChannelCommand extends CommandBase {
                 guildId: userVoiceChannel!.guild.id,
                 adapterCreator: userVoiceChannel!.guild.voiceAdapterCreator,
             });
+        } else if (channelDifference === 'USER_NO_CHANNEL') {
+            message.reply('You are not in a voice channel!');
+            return false;
         } else {
             return false;
         }

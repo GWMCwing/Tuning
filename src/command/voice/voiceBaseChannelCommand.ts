@@ -43,7 +43,7 @@ export class leaveChannelCommand extends CommandBase {
             .allowText()
             .allowGuild()
             .build();
-        const aliases = ['l'];
+        const aliases = ['l', 'dc', 'disconnect'];
         super(name, description, usage, aliases);
     }
     execute_Interaction(interaction: Interaction): boolean {
