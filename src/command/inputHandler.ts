@@ -1,10 +1,10 @@
 import { Interaction, Message } from 'discord.js';
 import { logger } from '../util/logger';
-import { PREFIX } from '../../config.json';
 import { CommandBase, CommandType } from './commandBase';
 // import all commands here
 import { loadAllCommands } from './allCommand';
 import { guildManager } from '../guild/Guild';
+import { DEFAULT_PREFIX } from '../util/defaultValue';
 //
 class CommandManager {
     constructor() {
@@ -63,8 +63,12 @@ function parseCommand(commandName: string): CommandBase | null {
 }
 
 function inputHandler_text(message: Message): void {
-    if (message.content.startsWith(PREFIX)) {
-        const input = message.content.substring(PREFIX.length);
+    let prefix: string = DEFAULT_PREFIX;
+    if (message.guildId) {
+        prefix = guildManager.getGuild(message.guildId).GuildConfig.prefix;
+    }
+    if (message.content.startsWith(prefix)) {
+        const input = message.content.substring(prefix.length);
         const commandName = input.split(' ')[0];
         const args = input.split(' ').slice(1);
         logger.log(
