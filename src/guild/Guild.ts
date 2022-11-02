@@ -7,8 +7,9 @@ import {
     GuildMember,
     VoiceBasedChannel,
 } from 'discord.js';
-import { PREFIX } from '../../config.json';
+import { PREFIX, DefaultTimeout } from '../../config.json';
 import { MusicPlayer } from '../feature/music/MusicPlayer';
+import { DEFAULT_AUDIO_TIMEOUT, DEFAULT_PREFIX } from '../util/defaultValue';
 import { logger } from '../util/logger';
 
 interface GuildConfig {
@@ -18,9 +19,12 @@ interface GuildConfig {
     defaultAudioTimeout: number;
 }
 function generateDefaultGuildConfig(): GuildConfig {
+    const prefix: string = PREFIX?.toString() || DEFAULT_PREFIX;
+    const defaultAudioTimeout: number =
+        Number(DefaultTimeout) || DEFAULT_AUDIO_TIMEOUT;
     return {
-        prefix: PREFIX,
-        defaultAudioTimeout: 1000 * 60 * 5,
+        prefix: prefix,
+        defaultAudioTimeout: defaultAudioTimeout,
     };
 }
 

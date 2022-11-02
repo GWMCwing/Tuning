@@ -8,6 +8,7 @@ import {
 import { inputHandler } from './command/inputHandler';
 import { TOKEN } from '../config.json';
 import { logger } from './util/logger';
+import { cliInputHandler } from './cli/cli';
 
 const clientIntent: ClientOptions = {
     intents: [
@@ -18,6 +19,7 @@ const clientIntent: ClientOptions = {
         GatewayIntentBits.GuildVoiceStates,
     ],
 };
+cliInputHandler.startHandlingCLIInput();
 const client = new Client(clientIntent);
 //
 //
