@@ -35,13 +35,13 @@ export class CommandUsageBuilder {
         return this;
     }
     build(): CommandUsage {
-        if (this.usage % 1 === 0 && (this.usage >> 1) % 1 === 0) {
+        if (this.usage % 2 === 0 && (this.usage >> 1) % 2 === 0) {
             logger.warn(
                 'CommandUsageBuilder',
                 `Building Command *${this.commandName}* with no allowed calling usage`
             );
         }
-        if ((this.usage >> 2) % 1 === 0 && (this.usage >> 3) % 1 === 0) {
+        if ((this.usage >> 2) % 2 === 0 && (this.usage >> 3) % 2 === 0) {
             logger.warn(
                 'CommandUsageBuilder',
                 `Building Command *${this.commandName}* with no allowed calling scope`

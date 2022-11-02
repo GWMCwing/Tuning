@@ -5,27 +5,32 @@ import {
     leaveChannelCommand,
 } from './voice/voiceBaseChannelCommand';
 import {
-    playTrackChannelCommand,
-    displayQueueCommand,
-    pauseTrackChannelCommand,
-    previousTrackChannelCommand,
-    resumeTrackChannelCommand,
-    skipTrackChannelCommand,
+    PlayTrackChannelCommand,
+    DisplayQueueCommand,
+    PauseTrackChannelCommand,
+    PreviousTrackChannelCommand,
+    ResumeTrackChannelCommand,
+    SkipTrackChannelCommand,
+    ToggleRandomPlayTrackCommand,
+    ToggleLoopQueueCommand,
+    ToggleLoopTrackCommand,
 } from './voice/music';
 
 export async function loadAllCommands(): Promise<void> {
-    logger.debug('CommandManager', 'Loading all commands');
+    logger.info('CommandManager', 'Loading all commands');
     await Promise.all([
         commandManager.setCommand(new joinChannelCommand()),
         commandManager.setCommand(new leaveChannelCommand()),
         //
-        commandManager.setCommand(new playTrackChannelCommand()),
-        commandManager.setCommand(new displayQueueCommand()),
-        commandManager.setCommand(new pauseTrackChannelCommand()),
-        commandManager.setCommand(new previousTrackChannelCommand()),
-        commandManager.setCommand(new resumeTrackChannelCommand()),
-        commandManager.setCommand(new skipTrackChannelCommand()),
+        commandManager.setCommand(new PlayTrackChannelCommand()),
+        commandManager.setCommand(new DisplayQueueCommand()),
+        commandManager.setCommand(new PauseTrackChannelCommand()),
+        commandManager.setCommand(new PreviousTrackChannelCommand()),
+        commandManager.setCommand(new ResumeTrackChannelCommand()),
+        commandManager.setCommand(new SkipTrackChannelCommand()),
+        commandManager.setCommand(new ToggleRandomPlayTrackCommand()),
+        commandManager.setCommand(new ToggleLoopQueueCommand()),
+        commandManager.setCommand(new ToggleLoopTrackCommand()),
     ]);
-
-    logger.debug('CommandManager', 'All commands Loaded');
+    logger.info('CommandManager', 'All commands Loaded');
 }

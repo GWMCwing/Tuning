@@ -103,19 +103,21 @@ export class MusicPlayer {
     setLoopState(state: LoopState): void {
         this.loopState = state;
     }
-    toggleLoopState(): void {
+    toggleLoopState(): LoopState {
         this.loopState =
             this.loopState === 'NONE'
                 ? 'SINGLE'
                 : this.loopState === 'SINGLE'
                 ? 'ALL'
                 : 'NONE';
+        return this.loopState;
     }
     setRandomState(state: boolean): void {
         this.randomState = state;
     }
-    toggleRandomState(): void {
+    toggleRandomState(): boolean {
         this.randomState = !this.randomState;
+        return this.randomState;
     }
     getPlayer(): AudioPlayer {
         return this.audioPlayer;

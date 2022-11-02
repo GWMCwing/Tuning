@@ -1,4 +1,4 @@
-import { LogLevel as LL } from '../../config.json';
+import { DEFAULT_LOG_LEVEL } from './defaultValue';
 const dateTimeFormatter = new Intl.DateTimeFormat([], {
     timeZone: 'Asia/Hong_Kong',
     hour12: false,
@@ -8,22 +8,8 @@ const dateTimeFormatter = new Intl.DateTimeFormat([], {
 });
 // format [HH:mm:ss] [LABEL/TYPE] [MESSAGE]
 export type LogLevel = 'DEBUG' | 'INFO' | 'LOG' | 'WARN' | 'ERROR';
-function checkIfLogLevelIsValid(LL: string) {
-    if (
-        LL === 'DEBUG' ||
-        LL === 'INFO' ||
-        LL === 'LOG' ||
-        LL === 'WARN' ||
-        LL === 'ERROR'
-    ) {
-        return true;
-    }
-    return false;
-}
 class Logger {
-    static logLevel: LogLevel = checkIfLogLevelIsValid(LL)
-        ? (LL as LogLevel)
-        : 'INFO';
+    static logLevel: LogLevel = DEFAULT_LOG_LEVEL;
     constructor() {}
     static setLogLevel(level: LogLevel) {
         Logger.logLevel = level;

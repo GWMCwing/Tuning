@@ -19,7 +19,7 @@ interface GuildConfig {
     defaultAudioTimeout: number;
 }
 function generateDefaultGuildConfig(): GuildConfig {
-    const prefix: string = PREFIX?.toString() || DEFAULT_PREFIX;
+    const prefix: string = DEFAULT_PREFIX;
     const defaultAudioTimeout: number =
         Number(DefaultTimeout) || DEFAULT_AUDIO_TIMEOUT;
     return {

@@ -50,7 +50,7 @@ async function getChannelDifference(
     };
 }
 
-export class playTrackChannelCommand extends CommandBase {
+export class PlayTrackChannelCommand extends CommandBase {
     constructor() {
         const name = 'play';
         const type: CommandType = 'VOICE';
@@ -113,7 +113,7 @@ export class playTrackChannelCommand extends CommandBase {
     }
 }
 
-export class pauseTrackChannelCommand extends CommandBase {
+export class PauseTrackChannelCommand extends CommandBase {
     constructor() {
         const name = 'pause';
         const type: CommandType = 'VOICE';
@@ -145,7 +145,7 @@ export class pauseTrackChannelCommand extends CommandBase {
     }
 }
 
-export class resumeTrackChannelCommand extends CommandBase {
+export class ResumeTrackChannelCommand extends CommandBase {
     constructor() {
         const name = 'resume';
         const type: CommandType = 'VOICE';
@@ -177,7 +177,7 @@ export class resumeTrackChannelCommand extends CommandBase {
     }
 }
 
-export class skipTrackChannelCommand extends CommandBase {
+export class SkipTrackChannelCommand extends CommandBase {
     constructor() {
         const name = 'skip';
         const type: CommandType = 'VOICE';
@@ -209,7 +209,7 @@ export class skipTrackChannelCommand extends CommandBase {
     }
 }
 
-export class previousTrackChannelCommand extends CommandBase {
+export class PreviousTrackChannelCommand extends CommandBase {
     constructor() {
         const name = 'previous';
         const type: CommandType = 'VOICE';
@@ -241,7 +241,7 @@ export class previousTrackChannelCommand extends CommandBase {
     }
 }
 
-export class displayQueueCommand extends CommandBase {
+export class DisplayQueueCommand extends CommandBase {
     constructor() {
         const name = 'queue';
         const type: CommandType = 'VOICE';
@@ -274,6 +274,109 @@ export class displayQueueCommand extends CommandBase {
             }
         }
         message.reply(reply);
+        return true;
+    }
+}
+export class ToggleRandomPlayTrackCommand extends CommandBase {
+    constructor() {
+        const name = 'random';
+        const type: CommandType = 'VOICE';
+        const description = 'randomize queue';
+        const usage = new CommandUsageBuilder(name)
+            .allowText()
+            .allowGuild()
+            .build();
+        const aliases: string[] = [];
+        super(name, type, description, usage, aliases);
+    }
+    async execute_Interaction(interaction: Interaction): Promise<boolean> {
+        return false;
+    }
+    async execute_Message(message: Message, args: string[]): Promise<boolean> {
+        if (!message.guild) return false;
+        const queue = guildManager
+            .getGuild(message.guild.id)
+            .musicPlayer.getQueue();
+        if (queue.length === 0) {
+            message.reply('The queue is empty');
+            return true;
+        }
+        const state = guildManager
+            .getGuild(message.guild.id)
+            .musicPlayer.toggleRandomState();
+        message.reply(`Random state is now ${state}`);
+        return true;
+    }
+}
+export class ToggleLoopTrackCommand extends CommandBase {
+    constructor() {
+        const name = 'loopTrack';
+        const type: CommandType = 'VOICE';
+        const description = 'Toggle Loop Track State';
+        const usage = new CommandUsageBuilder(name)
+            .allowText()
+            .allowGuild()
+            .build();
+        const aliases: string[] = ['looptrack', 'lt', 'loopt'];
+        super(name, type, description, usage, aliases);
+    }
+    async execute_Interaction(interaction: Interaction): Promise<boolean> {
+        return false;
+    }
+    async execute_Message(message: Message, args: string[]): Promise<boolean> {
+        if (!message.guild) return false;
+        const queue = guildManager
+            .getGuild(message.guild.id)
+            .musicPlayer.getQueue();
+        if (queue.length === 0) {
+            message.reply('The queue is empty');
+            return true;
+        }
+        const musicPlayer = guildManager.getGuild(message.guild.id).musicPlayer;
+        const state = musicPlayer.getPlayerState().loopState;
+        if (state === 'SINGLE') {
+            musicPlayer.setLoopState('NONE');
+            message.reply('Loop state is now OFF');
+        } else {
+            musicPlayer.setLoopState('SINGLE');
+            message.reply('Loop state is now Loop Track');
+        }
+        return true;
+    }
+}
+export class ToggleLoopQueueCommand extends CommandBase {
+    constructor() {
+        const name = 'loopQueue';
+        const type: CommandType = 'VOICE';
+        const description = 'Toggle Loop Queue State';
+        const usage = new CommandUsageBuilder(name)
+            .allowText()
+            .allowGuild()
+            .build();
+        const aliases: string[] = ['loopqueue', 'lq', 'loopq'];
+        super(name, type, description, usage, aliases);
+    }
+    async execute_Interaction(interaction: Interaction): Promise<boolean> {
+        return false;
+    }
+    async execute_Message(message: Message, args: string[]): Promise<boolean> {
+        if (!message.guild) return false;
+        const queue = guildManager
+            .getGuild(message.guild.id)
+            .musicPlayer.getQueue();
+        if (queue.length === 0) {
+            message.reply('The queue is empty');
+            return true;
+        }
+        const musicPlayer = guildManager.getGuild(message.guild.id).musicPlayer;
+        const state = musicPlayer.getPlayerState().loopState;
+        if (state === 'ALL') {
+            musicPlayer.setLoopState('NONE');
+            message.reply('Loop state is now OFF');
+        } else {
+            musicPlayer.setLoopState('ALL');
+            message.reply('Loop state is now Loop Queue');
+        }
         return true;
     }
 }
