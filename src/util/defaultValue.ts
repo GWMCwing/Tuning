@@ -1,5 +1,6 @@
 import { LogLevel as LogLevelType } from '../util/logger';
-import { LogLevel, PREFIX, DefaultTimeout } from '../../config.json';
+// import { LogLevel, PREFIX, DefaultTimeout } from '../../config.json';
+import { readFileSync } from 'fs';
 
 let _DEFAULT_PREFIX: string = '$';
 let _DEFAULT_LOG_LEVEL: LogLevelType = 'INFO';
@@ -10,23 +11,27 @@ function parseJsonConfig(): {
     LOG_LEVEL: LogLevelType;
     AUDIO_TIMEOUT: number;
 } {
-    if (PREFIX?.toString().length > 0) {
-        _DEFAULT_PREFIX = PREFIX.toString();
+    console.log('Parsing config.json');
+    //
+    const config = JSON.parse(readFileSync('./config.json', 'utf8'));
+    if (config.PREFIX?.toString().length > 0) {
+        _DEFAULT_PREFIX = config.PREFIX.toString();
     } else {
         console.warn('Prefix is not valid, using default prefix');
     }
     //
-    if (checkIfLogLevelIsValid(LogLevel)) {
-        _DEFAULT_LOG_LEVEL = LogLevel as LogLevelType;
+    if (checkIfLogLevelIsValid(config.LogLevel)) {
+        _DEFAULT_LOG_LEVEL = config.LogLevel as LogLevelType;
     } else {
         console.warn('Config', 'Invalid LogLevel in config.json');
     }
     //
-    if (Number(DefaultTimeout)) {
-        _DEFAULT_AUDIO_TIMEOUT = Number(DefaultTimeout);
+    if (Number(config.DefaultTimeout)) {
+        _DEFAULT_AUDIO_TIMEOUT = Number(config.DefaultTimeout);
     } else {
         console.warn('Config', 'Invalid DefaultTimeout in config.json');
     }
+    console.log('Parsed config.json');
     //
     return {
         PREFIX: _DEFAULT_PREFIX,

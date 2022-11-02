@@ -1,0 +1,6 @@
+{
+    "LogLevel": "DEBUG",
+    "TOKEN": "YOUR_TOKEN",
+    "PREFIX": "&",
+    "DefaultTimeout": 60000
+}

@@ -15,6 +15,8 @@ Key
 
 Most of the default values when the key values are not parsable are saved in the [defaultValue.ts](../src/util/defaultValue.ts) file.
 
+Template for config.json is saved in [config_template.json](./config_template.json).
+
 ---
 
 ## _Console Related_

@@ -7,7 +7,6 @@ import {
     GuildMember,
     VoiceBasedChannel,
 } from 'discord.js';
-import { PREFIX, DefaultTimeout } from '../../config.json';
 import { MusicPlayer } from '../feature/music/MusicPlayer';
 import { DEFAULT_AUDIO_TIMEOUT, DEFAULT_PREFIX } from '../util/defaultValue';
 import { logger } from '../util/logger';
@@ -20,8 +19,7 @@ interface GuildConfig {
 }
 function generateDefaultGuildConfig(): GuildConfig {
     const prefix: string = DEFAULT_PREFIX;
-    const defaultAudioTimeout: number =
-        Number(DefaultTimeout) || DEFAULT_AUDIO_TIMEOUT;
+    const defaultAudioTimeout: number = DEFAULT_AUDIO_TIMEOUT;
     return {
         prefix: prefix,
         defaultAudioTimeout: defaultAudioTimeout,
