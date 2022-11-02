@@ -1,9 +1,10 @@
 import { Interaction, Message } from 'discord.js';
 import { logger } from '../util/logger';
 import { PREFIX } from '../../config.json';
-import { CommandBase } from './commandBase';
+import { CommandBase, CommandType } from './commandBase';
 // import all commands here
 import { loadAllCommands } from './allCommand';
+import { guildManager } from '../guild/Guild';
 //
 class CommandManager {
     constructor() {
@@ -73,6 +74,9 @@ function inputHandler_text(message: Message): void {
         //
         const command = parseCommand(commandName);
         if (command) {
+            if (command.type == 'VOICE' && message.guildId) {
+                guildManager.getGuild(message.guildId).updateAudioLastActive();
+            }
             command.execute_Message(message, args);
         } else {
             message.reply(`Command ${commandName} not found`);

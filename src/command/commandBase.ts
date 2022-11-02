@@ -5,6 +5,8 @@ export interface CommandUsage {
     usage: number;
 }
 
+export type CommandType = 'GENERAL' | 'MUSIC' | 'VOICE';
+
 export class CommandUsageBuilder {
     // class for perform bit wise command usage handling
     // slash command on server, user, text command server, user
@@ -53,6 +55,7 @@ export abstract class CommandBase {
     name: string;
     description: string;
     usage: CommandUsage;
+    type: CommandType;
     // _permission: CommandPermission;
     aliases: string[];
     // Map<name,description>
@@ -61,6 +64,7 @@ export abstract class CommandBase {
     optionalArgs: Map<string, string>;
     constructor(
         name: string,
+        type: CommandType,
         description: string,
         usage: CommandUsage,
         aliases: string[]
@@ -68,6 +72,7 @@ export abstract class CommandBase {
         this.name = name;
         this.description = description;
         this.usage = usage;
+        this.type = type;
         this.aliases = aliases;
         this.requireArgs = new Map<string, string>();
         this.optionalArgs = new Map<string, string>();

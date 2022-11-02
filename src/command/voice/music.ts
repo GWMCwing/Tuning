@@ -13,7 +13,12 @@ import {
 } from 'discord.js';
 import { guildManager } from '../../guild/Guild';
 import { logger } from '../../util/logger';
-import { CommandBase, CommandUsageBuilder } from '../commandBase';
+import {
+    CommandBase,
+    CommandType,
+    CommandUsage,
+    CommandUsageBuilder,
+} from '../commandBase';
 
 type ChannelDifference =
     | 'SAME_CHANNEL'
@@ -48,13 +53,14 @@ async function getChannelDifference(
 export class playTrackChannelCommand extends CommandBase {
     constructor() {
         const name = 'play';
+        const type: CommandType = 'VOICE';
         const description = 'play the given track';
         const usage = new CommandUsageBuilder(name)
             .allowText()
             .allowGuild()
             .build();
         const aliases = ['p'];
-        super(name, description, usage, aliases);
+        super(name, type, description, usage, aliases);
         this.requireArgs.set('track', 'The track to play');
     }
     async execute_Interaction(interaction: Interaction): Promise<boolean> {
@@ -110,13 +116,14 @@ export class playTrackChannelCommand extends CommandBase {
 export class pauseTrackChannelCommand extends CommandBase {
     constructor() {
         const name = 'pause';
+        const type: CommandType = 'VOICE';
         const description = 'pause current queue';
         const usage = new CommandUsageBuilder(name)
             .allowText()
             .allowGuild()
             .build();
         const aliases = ['pa'];
-        super(name, description, usage, aliases);
+        super(name, type, description, usage, aliases);
     }
     async execute_Interaction(interaction: Interaction): Promise<boolean> {
         return false;
@@ -141,13 +148,14 @@ export class pauseTrackChannelCommand extends CommandBase {
 export class resumeTrackChannelCommand extends CommandBase {
     constructor() {
         const name = 'resume';
+        const type: CommandType = 'VOICE';
         const description = 'resume queue';
         const usage = new CommandUsageBuilder(name)
             .allowText()
             .allowGuild()
             .build();
         const aliases = ['rs'];
-        super(name, description, usage, aliases);
+        super(name, type, description, usage, aliases);
     }
     async execute_Interaction(interaction: Interaction): Promise<boolean> {
         return false;
@@ -172,13 +180,14 @@ export class resumeTrackChannelCommand extends CommandBase {
 export class skipTrackChannelCommand extends CommandBase {
     constructor() {
         const name = 'skip';
+        const type: CommandType = 'VOICE';
         const description = 'skip track';
         const usage = new CommandUsageBuilder(name)
             .allowText()
             .allowGuild()
             .build();
         const aliases = ['sk'];
-        super(name, description, usage, aliases);
+        super(name, type, description, usage, aliases);
     }
     async execute_Interaction(interaction: Interaction): Promise<boolean> {
         return false;
@@ -203,13 +212,14 @@ export class skipTrackChannelCommand extends CommandBase {
 export class previousTrackChannelCommand extends CommandBase {
     constructor() {
         const name = 'previous';
+        const type: CommandType = 'VOICE';
         const description = 'play previous track';
         const usage = new CommandUsageBuilder(name)
             .allowText()
             .allowGuild()
             .build();
         const aliases: string[] = [];
-        super(name, description, usage, aliases);
+        super(name, type, description, usage, aliases);
     }
     async execute_Interaction(interaction: Interaction): Promise<boolean> {
         return false;
@@ -234,13 +244,14 @@ export class previousTrackChannelCommand extends CommandBase {
 export class displayQueueCommand extends CommandBase {
     constructor() {
         const name = 'queue';
+        const type: CommandType = 'VOICE';
         const description = 'display current queue';
         const usage = new CommandUsageBuilder(name)
             .allowText()
             .allowGuild()
             .build();
         const aliases = ['q'];
-        super(name, description, usage, aliases);
+        super(name, type, description, usage, aliases);
     }
     async execute_Interaction(interaction: Interaction): Promise<boolean> {
         return false;
