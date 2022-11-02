@@ -75,7 +75,9 @@ function inputHandler_text(message: Message): void {
         const command = parseCommand(commandName);
         if (command) {
             if (command.type == 'VOICE' && message.guildId) {
-                guildManager.getGuild(message.guildId).updateAudioLastActive();
+                guildManager
+                    .getGuild(message.guildId)
+                    .updateAudioLastActive(message.client);
             }
             command.execute_Message(message, args);
         } else {

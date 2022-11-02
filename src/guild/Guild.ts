@@ -1,17 +1,33 @@
-import { getVoiceConnection } from '@discordjs/voice';
-import { Guild, GuildMember } from 'discord.js';
+import { getVoiceConnection, AudioPlayerStatus } from '@discordjs/voice';
+import {
+    Channel,
+    ChannelType,
+    Client,
+    Guild,
+    GuildMember,
+    VoiceBasedChannel,
+} from 'discord.js';
 import { PREFIX } from '../../config.json';
 import { MusicPlayer } from '../feature/music/MusicPlayer';
+import { logger } from '../util/logger';
 
 interface GuildConfig {
     prefix: string;
     // other properties for other functions, or config options for functions
+    // audio
+    defaultAudioTimeout: number;
+}
+function generateDefaultGuildConfig(): GuildConfig {
+    return {
+        prefix: PREFIX,
+        defaultAudioTimeout: 1000 * 60 * 5,
+    };
 }
 
 export class GuildHandler {
     constructor(id: string) {
         this._id = id;
-        this._guildConfig = { prefix: PREFIX };
+        this._guildConfig = generateDefaultGuildConfig();
         this._musicPlayer = new MusicPlayer(id);
         this._audioLastActive = Date.now();
     }
@@ -28,23 +44,64 @@ export class GuildHandler {
     get audioLastActive(): number {
         return this._audioLastActive;
     }
-    updateAudioLastActive(): void {
+    updateAudioLastActive(client: Client): void {
         this._audioLastActive = Date.now();
-        this.updateTimeout(1000 * 60 * 5);
+        this.updateTimeout(client, this.defaultAudioTimeoutTime);
     }
 
-    private updateTimeout(delay: number): void {
+    private updateTimeout(client: Client, delay: number): void {
         if (this._audioTimeout) {
             clearTimeout(this._audioTimeout);
         }
         this._audioTimeout = setTimeout(() => {
-            this._musicPlayer.stop();
-            this.leaveVoiceChannel();
+            const playerState =
+                this.musicPlayer.getPlayerState().playState.status;
+            const leaveAbleStatus =
+                playerState === AudioPlayerStatus.Idle ||
+                playerState === AudioPlayerStatus.AutoPaused ||
+                playerState === AudioPlayerStatus.Paused;
+            if (
+                this.getVoiceChannelMemberCount(client) == 0 ||
+                (leaveAbleStatus && this._audioLastActive + delay < Date.now())
+            ) {
+                this.leaveVoiceChannel();
+                this._musicPlayer.stop();
+                return;
+            }
+            return this.updateTimeout(client, delay);
         }, delay);
     }
     leaveVoiceChannel(): void {
         getVoiceConnection(this._id)?.destroy();
         this._musicPlayer.stop();
+    }
+    getChannel(client: Client, id: string): Channel | null {
+        const channel = client.channels.cache.get(id);
+        return channel ? channel : null;
+    }
+    getVoiceChannel(client: Client): VoiceBasedChannel | null {
+        const channelId = getVoiceConnection(this._id)?.joinConfig.channelId;
+        if (!channelId) return null;
+        const channel = this.getChannel(client, channelId);
+        if (channel?.type === ChannelType.GuildVoice) {
+            return channel;
+        }
+        return null;
+    }
+    getVoiceChannelMemberCount(
+        client: Client,
+        excludeBot: boolean = true
+    ): number {
+        const memberList = this.getVoiceChannel(client)?.members;
+        if (!memberList) return 0;
+        if (excludeBot) {
+            let count = 0;
+            for (const member of memberList.values()) {
+                if (!member.user.bot) count++;
+            }
+            return count;
+        }
+        return memberList.size;
     }
 
     private _id: string;
@@ -52,6 +109,7 @@ export class GuildHandler {
     private _musicPlayer: MusicPlayer;
     private _audioLastActive: number;
     private _audioTimeout: NodeJS.Timeout | null = null;
+    private defaultAudioTimeoutTime = 1000 * 60 * 15;
 }
 
 class GuildManager {
