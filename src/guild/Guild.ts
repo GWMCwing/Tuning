@@ -46,7 +46,7 @@ export class GuildHandler {
     }
     updateAudioLastActive(client: Client): void {
         this._audioLastActive = Date.now();
-        this.updateTimeout(client, this.defaultAudioTimeoutTime);
+        this.updateTimeout(client, this._guildConfig.defaultAudioTimeout);
     }
 
     private updateTimeout(client: Client, delay: number): void {
