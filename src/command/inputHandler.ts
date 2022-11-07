@@ -1,5 +1,5 @@
 import { Interaction, Message } from 'discord.js';
-import { logger } from '../util/logger';
+import { logger } from '../util/app/logger';
 import { CommandBase, CommandType } from './commandBase';
 // import all commands here
 import { loadAllCommands } from './allCommand';

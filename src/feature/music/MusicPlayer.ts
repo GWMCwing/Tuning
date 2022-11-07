@@ -1,5 +1,5 @@
 import ytdl from 'ytdl-core';
-import { logger } from '../../util/logger';
+import { logger } from '../../util/app/logger';
 import {
     createAudioPlayer,
     createAudioResource,
@@ -132,29 +132,37 @@ export class MusicPlayer {
         });
         return result;
     }
-    // TODO implement command
     removeFromQueue(index: number): boolean {
         const id = this.queueIndex[index];
-        if (id) {
+        if (Number(id) === id) {
             this.queue.delete(id);
             this.queueIndex.splice(index, 1);
             return true;
         }
         return false;
     }
-    playTrack(index: number): void {
+    playTrack(index: number): boolean {
         const id = this.queueIndex[index];
-        if (id) {
+        if (Number(id) === id) {
             this.playSpecificAudioTrack(id);
+            return true;
         }
+        return false;
     }
-    seekTo(position: number): void {
-        const id = this.queueIndex[this.trackPlayingIndex];
-        if (id) {
-            this.playSpecificAudioTrack(id, position);
-        }
-    }
-    // TODO end
+    // seekTo(position: number): boolean {
+    //     logger.debug('player', 'seek to ' + position);
+    //     const id = this.queueIndex[this.trackPlayingIndex];
+    //     logger.debug(
+    //         'player',
+    //         'index: ' + this.trackPlayingIndex,
+    //         'seek to ' + id
+    //     );
+    //     if (Number(id) === id) {
+    //         this.playSpecificAudioTrack(id, position);
+    //         return true;
+    //     }
+    //     return false;
+    // }
     //
 
     getTrackInfo_ID(id: number): TrackInfo | undefined {
@@ -166,6 +174,7 @@ export class MusicPlayer {
 
     destroyTrack(): void {
         (this.trackStream as NodeJS.ReadStream)?.destroy();
+        this.trackStream = null;
     }
     //
 
@@ -201,38 +210,43 @@ export class MusicPlayer {
         const audioPlayer: AudioPlayer = createAudioPlayer(
             defaultAudioPlayerOption
         );
-        audioPlayer.on('stateChange', (oldState, newState) => {
+        audioPlayer.on('stateChange', async (oldState, newState) => {
             if (newState.status === 'idle') {
                 // end of track
-                this.updateTrackIndex();
-                this.playSpecificAudioTrack(this.trackPlayingIndex);
+                if (await this.updateTrackIndex()) {
+                    this.playSpecificAudioTrack(this.trackPlayingIndex);
+                }
             }
         });
         audioPlayer.on('error', (error) => {
-            logger.error(
-                'player',
-                error.name,
-                error.message,
-                JSON.stringify(error.resource, null, 2),
-                error.stack!
-            );
+            logger.error('player', error.name, error.message, error.stack!);
         });
         return audioPlayer;
     }
     //
     private setToQueue(id: number, result: TrackInfo): void {
+        // max is 140 per guild
+        if (this.queue.size >= 140) {
+            this.removeFromQueue(1);
+        }
         this.queue.set(id, result);
         this.queueIndex.push(id);
     }
     private playSpecificAudioTrack(id: number, seek: number = 0): PlayerError {
         if (this.queue.size === 0) return 'NO_TRACK';
+        this.audioPlayer.stop();
         this.destroyTrack();
+        logger.debug('player', 'play track ' + id);
         //
         let track = this.getTrackInfo_ID(id);
         if (!track) track = this.getTrackInfo_Index(id);
         if (track) {
+            logger.debug('player', 'play track ' + track.title);
+            this.trackPlayingIndex = this.queueIndex.indexOf(id);
             this.trackStream = getAudioStream(track, seek);
+            logger.debug('player', 'Audio stream get');
             if (this.trackStream) {
+                logger.debug('player', 'create resource');
                 this.audioResource = createAudioResource(
                     this.trackStream as NodeJS.ReadStream,
                     {
@@ -240,6 +254,7 @@ export class MusicPlayer {
                         // inputType: StreamType.OggOpus,
                     }
                 );
+                logger.debug('player', 'play resource');
                 this.audioPlayer.play(this.audioResource);
             }
             return 'NONE';

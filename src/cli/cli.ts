@@ -1,5 +1,5 @@
 import { createInterface } from 'readline';
-import { logger } from '../util/logger';
+import { logger } from '../util/app/logger';
 import { CliCommandBase } from './cliCommandBase';
 
 class CliInputHandler {

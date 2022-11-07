@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 import { MusicPlayer } from '../feature/music/MusicPlayer';
 import { DEFAULT_AUDIO_TIMEOUT, DEFAULT_PREFIX } from '../util/defaultValue';
-import { logger } from '../util/logger';
+import { logger } from '../util/app/logger';
 
 interface GuildConfig {
     prefix: string;

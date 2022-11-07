@@ -1,4 +1,4 @@
-import { LogLevel as LogLevelType } from '../util/logger';
+import { LogLevel as LogLevelType } from './app/logger';
 // import { LogLevel, PREFIX, DefaultTimeout } from '../../config.json';
 import { readFileSync } from 'fs';
 

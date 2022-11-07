@@ -12,7 +12,7 @@ import {
     VoiceBasedChannel,
 } from 'discord.js';
 import { guildManager } from '../../guild/Guild';
-import { logger } from '../../util/logger';
+import { logger } from '../../util/app/logger';
 import {
     CommandBase,
     CommandType,
@@ -48,6 +48,15 @@ async function getChannelDifference(
         channelDifference,
         userVoiceChannel: userChannel,
     };
+}
+async function isSameChannel(
+    client: Client,
+    member: GuildMember
+): Promise<Boolean> {
+    return (
+        (await getChannelDifference(client, member)).channelDifference ===
+        'SAME_CHANNEL'
+    );
 }
 
 export class PlayTrackChannelCommand extends CommandBase {
@@ -130,11 +139,7 @@ export class PauseTrackChannelCommand extends CommandBase {
     }
     async execute_Message(message: Message, args: string[]): Promise<boolean> {
         if (!message.guild) return false;
-        let { channelDifference } = await getChannelDifference(
-            message.client,
-            message.member!
-        );
-        if (channelDifference === 'SAME_CHANNEL') {
+        if (await isSameChannel(message.client, message.member!)) {
             const musicPlayer = guildManager.getGuild(
                 message.guild.id
             ).musicPlayer;
@@ -162,11 +167,7 @@ export class ResumeTrackChannelCommand extends CommandBase {
     }
     async execute_Message(message: Message, args: string[]): Promise<boolean> {
         if (!message.guild) return false;
-        let { channelDifference } = await getChannelDifference(
-            message.client,
-            message.member!
-        );
-        if (channelDifference === 'SAME_CHANNEL') {
+        if (await isSameChannel(message.client, message.member!)) {
             const musicPlayer = guildManager.getGuild(
                 message.guild.id
             ).musicPlayer;
@@ -194,11 +195,7 @@ export class SkipTrackChannelCommand extends CommandBase {
     }
     async execute_Message(message: Message, args: string[]): Promise<boolean> {
         if (!message.guild) return false;
-        let { channelDifference } = await getChannelDifference(
-            message.client,
-            message.member!
-        );
-        if (channelDifference === 'SAME_CHANNEL') {
+        if (await isSameChannel(message.client, message.member!)) {
             const musicPlayer = guildManager.getGuild(
                 message.guild.id
             ).musicPlayer;
@@ -226,11 +223,7 @@ export class PreviousTrackChannelCommand extends CommandBase {
     }
     async execute_Message(message: Message, args: string[]): Promise<boolean> {
         if (!message.guild) return false;
-        let { channelDifference } = await getChannelDifference(
-            message.client,
-            message.member!
-        );
-        if (channelDifference === 'SAME_CHANNEL') {
+        if (await isSameChannel(message.client, message.member!)) {
             const musicPlayer = guildManager.getGuild(
                 message.guild.id
             ).musicPlayer;
@@ -294,6 +287,9 @@ export class ToggleRandomPlayTrackCommand extends CommandBase {
     }
     async execute_Message(message: Message, args: string[]): Promise<boolean> {
         if (!message.guild) return false;
+        if (!(await isSameChannel(message.client, message.member!)))
+            return false;
+
         const queue = guildManager
             .getGuild(message.guild.id)
             .musicPlayer.getQueue();
@@ -325,6 +321,9 @@ export class ToggleLoopTrackCommand extends CommandBase {
     }
     async execute_Message(message: Message, args: string[]): Promise<boolean> {
         if (!message.guild) return false;
+        if (!(await isSameChannel(message.client, message.member!)))
+            return false;
+
         const queue = guildManager
             .getGuild(message.guild.id)
             .musicPlayer.getQueue();
@@ -361,6 +360,9 @@ export class ToggleLoopQueueCommand extends CommandBase {
     }
     async execute_Message(message: Message, args: string[]): Promise<boolean> {
         if (!message.guild) return false;
+        if (!(await isSameChannel(message.client, message.member!)))
+            return false;
+
         const queue = guildManager
             .getGuild(message.guild.id)
             .musicPlayer.getQueue();
@@ -378,5 +380,162 @@ export class ToggleLoopQueueCommand extends CommandBase {
             message.reply('Loop state is now Loop Queue');
         }
         return true;
+    }
+}
+export class ToggleLoopCommand extends CommandBase {
+    constructor() {
+        const name = 'loop';
+        const type: CommandType = 'VOICE';
+        const description = 'Toggle Loop State';
+        const usage = new CommandUsageBuilder(name)
+            .allowText()
+            .allowGuild()
+            .build();
+        const aliases: string[] = [];
+        super(name, type, description, usage, aliases);
+    }
+    async execute_Interaction(interaction: Interaction): Promise<boolean> {
+        return false;
+    }
+    async execute_Message(message: Message, args: string[]): Promise<boolean> {
+        if (!message.guild) return false;
+        if (!(await isSameChannel(message.client, message.member!)))
+            return false;
+        const queue = guildManager
+            .getGuild(message.guild.id)
+            .musicPlayer.getQueue();
+        if (queue.length === 0) {
+            message.reply('The queue is empty');
+            return true;
+        }
+        const musicPlayer = guildManager.getGuild(message.guild.id).musicPlayer;
+        const state = musicPlayer.getPlayerState().loopState;
+        if (state === 'ALL') {
+            musicPlayer.setLoopState('NONE');
+            message.reply('Loop state is now OFF');
+        } else if (state === 'SINGLE') {
+            musicPlayer.setLoopState('ALL');
+            message.reply('Loop state is now Loop Queue');
+        } else {
+            musicPlayer.setLoopState('SINGLE');
+            message.reply('Loop state is now Loop Track');
+        }
+        return true;
+    }
+}
+
+export class removeTrackCommand extends CommandBase {
+    constructor() {
+        const name = 'rm';
+        const type: CommandType = 'VOICE';
+        const description = 'remove a track from queue';
+        const usage = new CommandUsageBuilder(name)
+            .allowText()
+            .allowGuild()
+            .build();
+        const aliases: string[] = [];
+        super(name, type, description, usage, aliases);
+    }
+    async execute_Interaction(interaction: Interaction): Promise<boolean> {
+        return false;
+    }
+    async execute_Message(message: Message, args: string[]): Promise<boolean> {
+        if (!message.guild) return false;
+        if (!(await isSameChannel(message.client, message.member!)))
+            return false;
+        if (args === undefined || args.length === 0 || isNaN(Number(args[0]))) {
+            return false;
+        }
+        const queue = guildManager
+            .getGuild(message.guild.id)
+            .musicPlayer.getQueue();
+        if (queue.length === 0) {
+            message.reply('The queue is empty');
+            return true;
+        }
+        const musicPlayer = guildManager.getGuild(message.guild.id).musicPlayer;
+        if (!musicPlayer.removeFromQueue(Number(args[0]))) {
+            message.reply('Invalid index');
+            return true;
+        }
+        return true;
+    }
+}
+export class playQueueTrackCommand extends CommandBase {
+    constructor() {
+        const name = 'pqt';
+        const type: CommandType = 'VOICE';
+        const description = 'play a track from queue by index';
+        const usage = new CommandUsageBuilder(name)
+            .allowText()
+            .allowGuild()
+            .build();
+        const aliases: string[] = [];
+        super(name, type, description, usage, aliases);
+    }
+    async execute_Interaction(interaction: Interaction): Promise<boolean> {
+        return false;
+    }
+    async execute_Message(message: Message, args: string[]): Promise<boolean> {
+        if (!message.guild) return false;
+        if (!(await isSameChannel(message.client, message.member!)))
+            return false;
+        if (args === undefined || args.length === 0 || isNaN(Number(args[0]))) {
+            return false;
+        }
+        const queue = guildManager
+            .getGuild(message.guild.id)
+            .musicPlayer.getQueue();
+        if (queue.length === 0) {
+            message.reply('The queue is empty');
+            return true;
+        }
+        const musicPlayer = guildManager.getGuild(message.guild.id).musicPlayer;
+        if (!musicPlayer.playTrack(Number(args[0]))) {
+            message.reply('Invalid index');
+            return true;
+        }
+        return true;
+    }
+}
+export class seekTrackCommand extends CommandBase {
+    constructor() {
+        const name = 'seek';
+        const type: CommandType = 'VOICE';
+        const description = 'seek to a position in the current track';
+        const usage = new CommandUsageBuilder(name)
+            .allowText()
+            .allowGuild()
+            .build();
+        const aliases: string[] = [];
+        super(name, type, description, usage, aliases);
+    }
+    async execute_Interaction(interaction: Interaction): Promise<boolean> {
+        return false;
+    }
+    async execute_Message(message: Message, args: string[]): Promise<boolean> {
+        if (!message.guild) return false;
+        if (!(await isSameChannel(message.client, message.member!)))
+            return false;
+        if (args === undefined || args.length === 0 || isNaN(Number(args[0]))) {
+            return false;
+        }
+        message.reply(
+            'Seeking is not available due to youtube inconsistencies'
+        );
+        return false;
+        // const queue = guildManager
+        //     .getGuild(message.guild.id)
+        //     .musicPlayer.getQueue();
+        // if (queue.length === 0) {
+        //     message.reply('The queue is empty');
+        //     return true;
+        // }
+        // const musicPlayer = guildManager.getGuild(message.guild.id).musicPlayer;
+        // if (!musicPlayer.seekTo(Number(args[0]) * 1000)) {
+        //     message.reply('Invalid time, format: seconds');
+        //     return true;
+        // }
+        // return true;
     }
 }

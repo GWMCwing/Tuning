@@ -1,4 +1,4 @@
-import { DEFAULT_LOG_LEVEL } from './defaultValue';
+import { DEFAULT_LOG_LEVEL } from '../defaultValue';
 const dateTimeFormatter = new Intl.DateTimeFormat([], {
     timeZone: 'Asia/Hong_Kong',
     hour12: false,
