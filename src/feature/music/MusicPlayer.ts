@@ -13,6 +13,7 @@ import {
     AudioPlayerIdleState,
     AudioPlayerPausedState,
 } from '@discordjs/voice';
+import { PresenceManager } from 'discord.js';
 const yts = require('yt-search');
 const ytpl = require('ytpl');
 //
@@ -69,6 +70,7 @@ export class MusicPlayer {
         };
     }
     stop(): boolean {
+        this.destroyTrack();
         return this.audioPlayer.stop();
     }
     pause(): boolean {
@@ -93,11 +95,11 @@ export class MusicPlayer {
         }
         return false;
     }
-    playNext(): boolean {
-        return this.playNextAudioTrack() === 'NONE';
+    async playNext(): Promise<boolean> {
+        return (await this.playNextAudioTrack()) === 'NONE';
     }
-    playPrevious(): boolean {
-        return this.playPreviousAudioTrack() === 'NONE';
+    async playPrevious(): Promise<boolean> {
+        return (await this.playPreviousAudioTrack()) === 'NONE';
     }
     //
     setLoopState(state: LoopState): void {
@@ -130,11 +132,40 @@ export class MusicPlayer {
         });
         return result;
     }
+    // TODO implement command
+    removeFromQueue(index: number): boolean {
+        const id = this.queueIndex[index];
+        if (id) {
+            this.queue.delete(id);
+            this.queueIndex.splice(index, 1);
+            return true;
+        }
+        return false;
+    }
+    playTrack(index: number): void {
+        const id = this.queueIndex[index];
+        if (id) {
+            this.playSpecificAudioTrack(id);
+        }
+    }
+    seekTo(position: number): void {
+        const id = this.queueIndex[this.trackPlayingIndex];
+        if (id) {
+            this.playSpecificAudioTrack(id, position);
+        }
+    }
+    // TODO end
+    //
+
     getTrackInfo_ID(id: number): TrackInfo | undefined {
         return this.queue.get(id);
     }
     getTrackInfo_Index(index: number): TrackInfo | undefined {
         return this.queue.get(this.queueIndex[index]);
+    }
+
+    destroyTrack(): void {
+        (this.trackStream as NodeJS.ReadStream)?.destroy();
     }
     //
 
@@ -195,6 +226,7 @@ export class MusicPlayer {
     }
     private playSpecificAudioTrack(id: number, seek: number = 0): PlayerError {
         if (this.queue.size === 0) return 'NO_TRACK';
+        this.destroyTrack();
         //
         let track = this.getTrackInfo_ID(id);
         if (!track) track = this.getTrackInfo_Index(id);
@@ -214,29 +246,30 @@ export class MusicPlayer {
         }
         return 'NO_TRACK';
     }
-    private playNextAudioTrack(seek: number = 0): PlayerError {
+    private async playNextAudioTrack(seek: number = 0): Promise<PlayerError> {
         if (this.queue.size === 0) return 'NO_TRACK';
         this.trackPlayingIndex++;
         if (this.trackPlayingIndex >= this.queue.size) {
-            this.trackPlayingIndex--;
             this.audioPlayer.stop();
             return 'END_OF_PLAYLIST';
         }
         //
         return this.playSpecificAudioTrack(this.trackPlayingIndex, seek);
     }
-    private playPreviousAudioTrack(seek: number = 0): PlayerError {
+    private async playPreviousAudioTrack(
+        seek: number = 0
+    ): Promise<PlayerError> {
         if (this.queue.size === 0) return 'NO_TRACK';
         this.trackPlayingIndex--;
         if (this.trackPlayingIndex < 0) {
             this.audioPlayer.stop();
-            this.trackPlayingIndex++;
+            this.trackPlayingIndex = 0;
             return 'END_OF_PLAYLIST';
         }
         //
         return this.playSpecificAudioTrack(this.trackPlayingIndex, seek);
     }
-    private updateTrackIndex(): boolean {
+    private async updateTrackIndex(): Promise<boolean> {
         if (this.randomState) {
             this.trackPlayingIndex = Math.floor(
                 Math.random() * this.queue.size
