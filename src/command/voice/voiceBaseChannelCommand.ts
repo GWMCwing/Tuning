@@ -5,7 +5,12 @@ import {
     VoiceBasedChannel,
     VoiceChannel,
 } from 'discord.js';
-import { CommandBase, CommandType, CommandUsageBuilder } from '../commandBase';
+import {
+    CommandBase,
+    CommandReturn,
+    CommandType,
+    CommandUsageBuilder,
+} from '../commandBase';
 import { getVoiceConnection, joinVoiceChannel } from '@discordjs/voice';
 import { guildManager } from '../../guild/Guild';
 
@@ -21,10 +26,12 @@ export class joinChannelCommand extends CommandBase {
         const aliases = ['j'];
         super(name, type, description, usage, aliases);
     }
-    execute_Interaction(interaction: Interaction): boolean {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    execute_Message(message: Message): boolean {
+    async execute_Message(message: Message): Promise<CommandReturn> {
         const channel = message.member?.voice.channel;
         if (channel) {
             joinVoiceChannel({
@@ -32,9 +39,9 @@ export class joinChannelCommand extends CommandBase {
                 guildId: channel.guild.id,
                 adapterCreator: channel.guild.voiceAdapterCreator,
             });
-            return true;
+            return 'SUCCESS';
         }
-        return false;
+        return 'ERROR';
     }
 }
 export class leaveChannelCommand extends CommandBase {
@@ -49,14 +56,16 @@ export class leaveChannelCommand extends CommandBase {
         const aliases = ['l'];
         super(name, type, description, usage, aliases);
     }
-    execute_Interaction(interaction: Interaction): boolean {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    execute_Message(message: Message): boolean {
+    async execute_Message(message: Message): Promise<CommandReturn> {
         if (message.guild) {
             guildManager.getGuild(message.guild.id).leaveVoiceChannel();
-            return true;
+            return 'SUCCESS';
         }
-        return false;
+        return 'ERROR';
     }
 }

@@ -15,6 +15,7 @@ import { guildManager } from '../../guild/Guild';
 import { logger } from '../../util/app/logger';
 import {
     CommandBase,
+    CommandReturn,
     CommandType,
     CommandUsage,
     CommandUsageBuilder,
@@ -72,18 +73,23 @@ export class PlayTrackChannelCommand extends CommandBase {
         super(name, type, description, usage, aliases);
         this.requireArgs.set('track', 'The track to play');
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
         if (!message.guild) {
             message.reply('This command can only be used in a guild');
-            return false;
+            return 'NO_GUILD';
         }
         const musicPlayer = guildManager.getGuild(message.guild.id).musicPlayer;
         if (args.length === 0) {
             musicPlayer.play();
-            return true;
+            return 'SUCCESS';
         }
         //
         let connection: VoiceConnection;
@@ -99,7 +105,7 @@ export class PlayTrackChannelCommand extends CommandBase {
                 adapterCreator: userVoiceChannel!.guild.voiceAdapterCreator,
             });
         } else {
-            return false;
+            return 'NOT_SAME_CHANNEL';
         }
         //
         const trackList = await musicPlayer.addToQueue(args.join(' '));
@@ -111,14 +117,14 @@ export class PlayTrackChannelCommand extends CommandBase {
                 message.reply(`Added ${trackList[0].title} track to queue`);
             }
             connection.subscribe(musicPlayer.getPlayer());
-            if (musicPlayer.play()) return true;
+            if (musicPlayer.play()) return 'SUCCESS';
             else {
                 message.reply('Failed to play track');
-                return false;
+                return 'ERROR';
             }
         }
         message.reply('Failed to add track to queue');
-        return false;
+        return 'ERROR';
     }
 }
 
@@ -134,19 +140,24 @@ export class PauseTrackChannelCommand extends CommandBase {
         const aliases = ['pa'];
         super(name, type, description, usage, aliases);
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
-        if (!message.guild) return false;
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
+        if (!message.guild) return 'NO_GUILD';
         if (await isSameChannel(message.client, message.member!)) {
             const musicPlayer = guildManager.getGuild(
                 message.guild.id
             ).musicPlayer;
             musicPlayer.pause();
-            return true;
+            return 'SUCCESS';
         }
-        return false;
+        return 'ERROR';
     }
 }
 
@@ -162,19 +173,24 @@ export class ResumeTrackChannelCommand extends CommandBase {
         const aliases = ['rs'];
         super(name, type, description, usage, aliases);
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
-        if (!message.guild) return false;
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
+        if (!message.guild) return 'NO_GUILD';
         if (await isSameChannel(message.client, message.member!)) {
             const musicPlayer = guildManager.getGuild(
                 message.guild.id
             ).musicPlayer;
             musicPlayer.resume();
-            return true;
+            return 'SUCCESS';
         }
-        return false;
+        return 'ERROR';
     }
 }
 
@@ -190,19 +206,24 @@ export class SkipTrackChannelCommand extends CommandBase {
         const aliases = ['sk'];
         super(name, type, description, usage, aliases);
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
-        if (!message.guild) return false;
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
+        if (!message.guild) return 'NO_GUILD';
         if (await isSameChannel(message.client, message.member!)) {
             const musicPlayer = guildManager.getGuild(
                 message.guild.id
             ).musicPlayer;
             musicPlayer.playNext();
-            return true;
+            return 'SUCCESS';
         }
-        return false;
+        return 'ERROR';
     }
 }
 
@@ -218,19 +239,24 @@ export class PreviousTrackChannelCommand extends CommandBase {
         const aliases: string[] = [];
         super(name, type, description, usage, aliases);
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
-        if (!message.guild) return false;
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
+        if (!message.guild) return 'NO_GUILD';
         if (await isSameChannel(message.client, message.member!)) {
             const musicPlayer = guildManager.getGuild(
                 message.guild.id
             ).musicPlayer;
             musicPlayer.playPrevious();
-            return true;
+            return 'SUCCESS';
         }
-        return false;
+        return 'ERROR';
     }
 }
 
@@ -246,17 +272,22 @@ export class DisplayQueueCommand extends CommandBase {
         const aliases = ['q'];
         super(name, type, description, usage, aliases);
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
-        if (!message.guild) return false;
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
+        if (!message.guild) return 'NO_GUILD';
         const queue = guildManager
             .getGuild(message.guild.id)
             .musicPlayer.getQueue();
         if (queue.length === 0) {
             message.reply('The queue is empty');
-            return true;
+            return 'SUCCESS';
         }
         let reply = 'The queue is:\n';
         for (let i = 0; i < queue.length; i++) {
@@ -267,7 +298,7 @@ export class DisplayQueueCommand extends CommandBase {
             }
         }
         message.reply(reply);
-        return true;
+        return 'SUCCESS';
     }
 }
 export class ToggleRandomPlayTrackCommand extends CommandBase {
@@ -282,26 +313,31 @@ export class ToggleRandomPlayTrackCommand extends CommandBase {
         const aliases: string[] = [];
         super(name, type, description, usage, aliases);
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
-        if (!message.guild) return false;
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
+        if (!message.guild) return 'NO_GUILD';
         if (!(await isSameChannel(message.client, message.member!)))
-            return false;
+            return 'NOT_SAME_CHANNEL';
 
         const queue = guildManager
             .getGuild(message.guild.id)
             .musicPlayer.getQueue();
         if (queue.length === 0) {
             message.reply('The queue is empty');
-            return true;
+            return 'SUCCESS';
         }
         const state = guildManager
             .getGuild(message.guild.id)
             .musicPlayer.toggleRandomState();
         message.reply(`Random state is now ${state}`);
-        return true;
+        return 'SUCCESS';
     }
 }
 export class ToggleLoopTrackCommand extends CommandBase {
@@ -316,20 +352,25 @@ export class ToggleLoopTrackCommand extends CommandBase {
         const aliases: string[] = ['looptrack', 'lt', 'loopt'];
         super(name, type, description, usage, aliases);
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
-        if (!message.guild) return false;
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
+        if (!message.guild) return 'NO_GUILD';
         if (!(await isSameChannel(message.client, message.member!)))
-            return false;
+            return 'NOT_SAME_CHANNEL';
 
         const queue = guildManager
             .getGuild(message.guild.id)
             .musicPlayer.getQueue();
         if (queue.length === 0) {
             message.reply('The queue is empty');
-            return true;
+            return 'SUCCESS';
         }
         const musicPlayer = guildManager.getGuild(message.guild.id).musicPlayer;
         const state = musicPlayer.getPlayerState().loopState;
@@ -340,7 +381,7 @@ export class ToggleLoopTrackCommand extends CommandBase {
             musicPlayer.setLoopState('SINGLE');
             message.reply('Loop state is now Loop Track');
         }
-        return true;
+        return 'SUCCESS';
     }
 }
 export class ToggleLoopQueueCommand extends CommandBase {
@@ -355,20 +396,25 @@ export class ToggleLoopQueueCommand extends CommandBase {
         const aliases: string[] = ['loopqueue', 'lq', 'loopq'];
         super(name, type, description, usage, aliases);
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
-        if (!message.guild) return false;
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
+        if (!message.guild) return 'NO_GUILD';
         if (!(await isSameChannel(message.client, message.member!)))
-            return false;
+            return 'NOT_SAME_CHANNEL';
 
         const queue = guildManager
             .getGuild(message.guild.id)
             .musicPlayer.getQueue();
         if (queue.length === 0) {
             message.reply('The queue is empty');
-            return true;
+            return 'SUCCESS';
         }
         const musicPlayer = guildManager.getGuild(message.guild.id).musicPlayer;
         const state = musicPlayer.getPlayerState().loopState;
@@ -379,7 +425,7 @@ export class ToggleLoopQueueCommand extends CommandBase {
             musicPlayer.setLoopState('ALL');
             message.reply('Loop state is now Loop Queue');
         }
-        return true;
+        return 'SUCCESS';
     }
 }
 export class ToggleLoopCommand extends CommandBase {
@@ -394,19 +440,24 @@ export class ToggleLoopCommand extends CommandBase {
         const aliases: string[] = [];
         super(name, type, description, usage, aliases);
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
-        if (!message.guild) return false;
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
+        if (!message.guild) return 'NO_GUILD';
         if (!(await isSameChannel(message.client, message.member!)))
-            return false;
+            return 'NOT_SAME_CHANNEL';
         const queue = guildManager
             .getGuild(message.guild.id)
             .musicPlayer.getQueue();
         if (queue.length === 0) {
             message.reply('The queue is empty');
-            return true;
+            return 'SUCCESS';
         }
         const musicPlayer = guildManager.getGuild(message.guild.id).musicPlayer;
         const state = musicPlayer.getPlayerState().loopState;
@@ -420,7 +471,7 @@ export class ToggleLoopCommand extends CommandBase {
             musicPlayer.setLoopState('SINGLE');
             message.reply('Loop state is now Loop Track');
         }
-        return true;
+        return 'SUCCESS';
     }
 }
 
@@ -436,29 +487,34 @@ export class removeTrackCommand extends CommandBase {
         const aliases: string[] = [];
         super(name, type, description, usage, aliases);
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
-        if (!message.guild) return false;
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
+        if (!message.guild) return 'NO_GUILD';
         if (!(await isSameChannel(message.client, message.member!)))
-            return false;
+            return 'NOT_SAME_CHANNEL';
         if (args === undefined || args.length === 0 || isNaN(Number(args[0]))) {
-            return false;
+            return 'INVALID_USAGE';
         }
         const queue = guildManager
             .getGuild(message.guild.id)
             .musicPlayer.getQueue();
         if (queue.length === 0) {
             message.reply('The queue is empty');
-            return true;
+            return 'SUCCESS';
         }
         const musicPlayer = guildManager.getGuild(message.guild.id).musicPlayer;
         if (!musicPlayer.removeFromQueue(Number(args[0]))) {
             message.reply('Invalid index');
-            return true;
+            return 'INVALID_USAGE';
         }
-        return true;
+        return 'SUCCESS';
     }
 }
 export class playQueueTrackCommand extends CommandBase {
@@ -473,29 +529,34 @@ export class playQueueTrackCommand extends CommandBase {
         const aliases: string[] = [];
         super(name, type, description, usage, aliases);
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
-        if (!message.guild) return false;
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
+        if (!message.guild) return 'NO_GUILD';
         if (!(await isSameChannel(message.client, message.member!)))
-            return false;
+            return 'NOT_SAME_CHANNEL';
         if (args === undefined || args.length === 0 || isNaN(Number(args[0]))) {
-            return false;
+            return 'INVALID_USAGE';
         }
         const queue = guildManager
             .getGuild(message.guild.id)
             .musicPlayer.getQueue();
         if (queue.length === 0) {
             message.reply('The queue is empty');
-            return true;
+            return 'SUCCESS';
         }
         const musicPlayer = guildManager.getGuild(message.guild.id).musicPlayer;
         if (!musicPlayer.playTrack(Number(args[0]))) {
             message.reply('Invalid index');
-            return true;
+            return 'INVALID_USAGE';
         }
-        return true;
+        return 'SUCCESS';
     }
 }
 export class seekTrackCommand extends CommandBase {
@@ -510,20 +571,25 @@ export class seekTrackCommand extends CommandBase {
         const aliases: string[] = [];
         super(name, type, description, usage, aliases);
     }
-    async execute_Interaction(interaction: Interaction): Promise<boolean> {
-        return false;
+    async execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn> {
+        return 'NOT_IMPLEMENTED';
     }
-    async execute_Message(message: Message, args: string[]): Promise<boolean> {
-        if (!message.guild) return false;
+    async execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn> {
+        if (!message.guild) return 'NO_GUILD';
         if (!(await isSameChannel(message.client, message.member!)))
-            return false;
+            return 'NOT_SAME_CHANNEL';
         if (args === undefined || args.length === 0 || isNaN(Number(args[0]))) {
-            return false;
+            return 'INVALID_USAGE';
         }
         message.reply(
             'Seeking is not available due to youtube inconsistencies'
         );
-        return false;
+        return 'NOT_IMPLEMENTED';
         // const queue = guildManager
         //     .getGuild(message.guild.id)
         //     .musicPlayer.getQueue();

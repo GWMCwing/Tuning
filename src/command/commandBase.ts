@@ -6,6 +6,19 @@ export interface CommandUsage {
 }
 
 export type CommandType = 'GENERAL' | 'MUSIC' | 'VOICE';
+export type CommandReturn =
+    | 'SUCCESS'
+    | 'ERROR'
+    | 'NO_PERMISSION'
+    | 'INVALID_USAGE'
+    | 'NO_GUILD'
+    | 'NO_VOICE'
+    | 'NO_TEXT'
+    | 'NO_VOICE_CONNECTION'
+    | 'NO_VOICE_CHANNEL'
+    | 'NO_VOICE_MEMBER'
+    | 'NOT_IMPLEMENTED'
+    | 'NOT_SAME_CHANNEL';
 
 export class CommandUsageBuilder {
     // class for perform bit wise command usage handling
@@ -78,6 +91,11 @@ export abstract class CommandBase {
         this.optionalArgs = new Map<string, string>();
     }
     //
-    abstract execute_Interaction(interaction: Interaction): void;
-    abstract execute_Message(message: Message, args: string[]): void;
+    abstract execute_Interaction(
+        interaction: Interaction
+    ): Promise<CommandReturn>;
+    abstract execute_Message(
+        message: Message,
+        args: string[]
+    ): Promise<CommandReturn>;
 }

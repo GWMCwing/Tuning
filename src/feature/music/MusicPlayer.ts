@@ -69,7 +69,12 @@ export class MusicPlayer {
             randomState: this.randomState,
         };
     }
+    private setDefaultPlayerState(): void {
+        this.loopState = 'NONE';
+        this.randomState = false;
+    }
     stop(): boolean {
+        this.setDefaultPlayerState();
         this.destroyTrack();
         return this.audioPlayer.stop();
     }
@@ -80,7 +85,7 @@ export class MusicPlayer {
         return this.audioPlayer.unpause();
     }
     play(): boolean {
-        logger.debug('player', 'status: ' + this.audioPlayer.state.status);
+        // logger.debug('player', 'status: ' + this.audioPlayer.state.status);
         if (
             this.audioPlayer.state.status === AudioPlayerStatus.Idle ||
             this.audioPlayer.state.status === AudioPlayerStatus.Paused ||
@@ -236,17 +241,17 @@ export class MusicPlayer {
         if (this.queue.size === 0) return 'NO_TRACK';
         this.audioPlayer.stop();
         this.destroyTrack();
-        logger.debug('player', 'play track ' + id);
+        // logger.debug('player', 'play track ' + id);
         //
         let track = this.getTrackInfo_ID(id);
         if (!track) track = this.getTrackInfo_Index(id);
         if (track) {
-            logger.debug('player', 'play track ' + track.title);
+            // logger.debug('player', 'play track ' + track.title);
             this.trackPlayingIndex = this.queueIndex.indexOf(id);
             this.trackStream = getAudioStream(track, seek);
-            logger.debug('player', 'Audio stream get');
+            // logger.debug('player', 'Audio stream get');
             if (this.trackStream) {
-                logger.debug('player', 'create resource');
+                // logger.debug('player', 'create resource');
                 this.audioResource = createAudioResource(
                     this.trackStream as NodeJS.ReadStream,
                     {
@@ -254,7 +259,7 @@ export class MusicPlayer {
                         // inputType: StreamType.OggOpus,
                     }
                 );
-                logger.debug('player', 'play resource');
+                // logger.debug('player', 'play resource');
                 this.audioPlayer.play(this.audioResource);
             }
             return 'NONE';
@@ -265,6 +270,7 @@ export class MusicPlayer {
         if (this.queue.size === 0) return 'NO_TRACK';
         this.trackPlayingIndex++;
         if (this.trackPlayingIndex >= this.queue.size) {
+            this.trackPlayingIndex = this.queue.size - 1;
             this.audioPlayer.stop();
             return 'END_OF_PLAYLIST';
         }
