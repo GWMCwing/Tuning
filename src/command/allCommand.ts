@@ -19,6 +19,7 @@ import {
     playQueueTrackCommand,
     seekTrackCommand,
 } from './voice/music';
+import { helpCommand } from './common/help';
 
 async function loadAllMusicCommands(): Promise<void[]> {
     logger.info('Loading music commands');
@@ -46,6 +47,7 @@ async function loadAllMusicCommands(): Promise<void[]> {
 export async function loadAllCommands(): Promise<void> {
     logger.info('CommandManager', 'Loading all commands');
     await Promise.all([
+        commandManager.setCommand(new helpCommand()),
         //
         commandManager.setCommand(new joinChannelCommand()),
         commandManager.setCommand(new leaveChannelCommand()),

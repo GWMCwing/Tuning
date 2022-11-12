@@ -90,7 +90,22 @@ function inputHandler_text(message: Message): void {
     }
 }
 
-function inputHandler_interaction(interaction: Interaction): void {}
+function inputHandler_interaction(interaction: Interaction): void {
+    if (!interaction.isChatInputCommand()) return;
+    const commandName = interaction.commandName;
+    const args = interaction.options.data;
+    logger.log(
+        'InputHandler',
+        `Interaction: ${commandName}, Args: ${args.join(',')}`
+    );
+    //
+    const command = parseCommand(commandName);
+    if (command && command.usage.usage & 2) {
+        command.execute_Interaction(interaction);
+    } else {
+        interaction.reply(`Command ${commandName} not found or is disabled`);
+    }
+}
 
 export function inputHandler(message: Message | Interaction): void {
     if (message instanceof Message) {

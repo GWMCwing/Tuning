@@ -43,4 +43,9 @@ client.on(Events.MessageCreate, async (message) => {
     inputHandler(message);
 });
 
+client.on(Events.InteractionCreate, async (interaction) => {
+    if (!interaction.isChatInputCommand()) return;
+    inputHandler(interaction);
+});
+
 client.login(TOKEN);
