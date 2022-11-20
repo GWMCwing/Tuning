@@ -1,6 +1,7 @@
 # Config Setting
 
-This is a description of the [config.json](../config.json) file, and possible values.
+This is a description of the [config.json](../src/config.json) file, and possible values.  
+| `config.json` is located in `/src/config.json` and is used to configure the bot.
 
 Keys in block letters are constant values and cannot be changed via the command line after the program has started. Otherwise, the value can be changed via the command line.
 

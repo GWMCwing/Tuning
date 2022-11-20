@@ -6,7 +6,7 @@ import {
     GatewayIntentBits,
 } from 'discord.js';
 import { inputHandler } from './command/inputHandler';
-import { TOKEN } from '../config.json';
+import { TOKEN } from './config.json';
 import { logger } from './util/app/logger';
 import { cliInputHandler } from './cli/cli';
 
